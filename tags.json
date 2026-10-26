@@ -1,0 +1,81 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "params": {
+            "type": "object"
+        }
+    },
+    "variables": {
+        "tagServiceNames": {
+            "App - NetWeaver Gateway (IMOS)": {
+                "tagServiceName": "IMOS – EUR"
+            },
+            "App - SAP PO (IMOS)": {
+                "tagServiceName": "IMOS – EUR"
+            },
+            "App - Netweaver Gateway FES": {
+                "tagServiceName": "SAP NETWEAVER GATEWAY - EUR"
+            },
+            "App - SAP BW": {
+                "tagServiceName": "SAP BUSINESS WAREHOUSE - EUR"
+            },
+            "App - S/4HANA Utilities": {
+                "tagServiceName": "UTILITIES - EUR"
+            },
+            "App - Convergent Charging": {
+                "tagServiceName": "SAP HYBRIS BILLING - EUR"
+            },
+            "App - Convergent Invoicing": {
+                "tagServiceName": "SAP HYBRIS BILLING - EUR"
+            },
+            "App - SOM (CRM ABAP)": {
+                "tagServiceName": "SAP HYBRIS BILLING - EUR"
+            },
+            "App - SOM (CRM JAVA)": {
+                "tagServiceName": "SAP HYBRIS BILLING - EUR"
+            },
+            "App - Cloud Connector": {
+                "tagServiceName": "SAP CLOUD CONNECTOR"
+            },
+            "DB - NetWeaver Gateway (IMOS)": {
+                "tagServiceName": "IMOS – EUR"
+            },
+            "DB - SAP PO (IMOS)": {
+                "tagServiceName": "IMOS – EUR"
+            },
+            "DB - Netweaver Gateway FES": {
+                "tagServiceName": "SAP NETWEAVER GATEWAY - EUR"
+            },
+            "DB - SAP BW": {
+                "tagServiceName": "SAP BUSINESS WAREHOUSE - EUR"
+            },
+            "DB - S/4HANA Utilities": {
+                "tagServiceName": "UTILITIES - EUR"
+            },
+            "DB - S/4HANA Hybris Billing": {
+                "tagServiceName": "SAP HYBRIS BILLING - EUR"
+            }
+        },
+        "tagEnvironments": {
+            "SAP Dev Test": {
+                "tagEnvironment": "SAP Dev Test"
+            }
+        }
+    },
+    "resources": [],
+    "outputs": {
+        "output": {
+            "type": "object",
+            "value": {
+                "Environment": "[variables('tagEnvironments')[parameters('params').subscription].tagEnvironment]",
+                "Service Name": "[variables('tagServiceNames')[parameters('params').vmRole].tagServiceName]",
+                "Service Owner": "[parameters('params').tagServiceOwner]",
+                "Service Ticket Request ID": "[parameters('params').tagServiceTicketRequestID]",
+                "Source": "[parameters('params').tagSource]",
+                "Project Name": "[parameters('params').tagProjectName]",
+                "Cost Code ID": "[parameters('params').tagCostCodeID]"
+            }
+        }
+    }
+}

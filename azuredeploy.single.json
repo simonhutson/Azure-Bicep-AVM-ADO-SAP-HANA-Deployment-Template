@@ -1,0 +1,169 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmDeploymentNumber": {
+            "type": "string",
+            "maxLength": 2,
+            "minLength": 2,
+            "metadata": {
+                "description": "Unique, 2-digit deployment number, e.g. 20"
+            }
+        },
+        "vmInstanceNumber": {
+            "type": "string",
+            "maxLength": 1,
+            "minLength": 1,
+            "metadata": {
+                "description": "Unique, 1-digit VM Instance number, e.g. 4"
+            }
+        },
+        "vmImage": {
+            "type": "string",
+            "allowedValues": [
+                "Gallery Image - SLES SAP BYOS 12-SP1",
+                "Gallery Image - SLES SAP BYOS 12-SP2",
+                "Gallery Image - SLES SAP BYOS 12-SP3"
+            ],
+            "defaultValue": "Gallery Image - SLES SAP BYOS 12-SP2",
+            "metadata": {
+                "description": "The Virtual Machine operating system you want to deploy"
+            }
+        },
+        "vmRole": {
+            "type": "string",
+            "allowedValues": [
+                "App - NetWeaver Gateway (IMOS)",
+                "App - SAP PO (IMOS)",
+                "App - Netweaver Gateway FES",
+                "App - SAP BW",
+                "App - S/4HANA Utilities",
+                "App - Convergent Charging",
+                "App - Convergent Invoicing",
+                "App - SOM (CRM ABAP)",
+                "App - SOM (CRM JAVA)",
+                "App - Cloud Connector",
+                "DB - NetWeaver Gateway (IMOS)",
+                "DB - SAP PO (IMOS)",
+                "DB - Netweaver Gateway FES",
+                "DB - SAP BW",
+                "DB - S/4HANA Utilities",
+                "DB - S/4HANA Hybris Billing"
+            ],
+            "defaultValue": "App - NetWeaver Gateway (IMOS)",
+            "metadata": {
+                "description": "The Virtual Machine role you want to deploy"
+            }
+        },
+        "vmAdminUserName": {
+            "type": "string",
+            "defaultValue": "azureuser"
+        },
+        "vmAdminPassword": {
+            "type": "securestring"
+        },
+        "Nic-1": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["","","",""],
+            "metadata": {
+                "description": "Array of static IP addresses for Nic-1. If any address is blank, DHCP will be used"
+            }
+        },
+        "Nic-2": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["","","",""],
+            "metadata": {
+                "description": "Array of static IP addresses for Nic-2. If any address is blank, DHCP will be used"
+            }
+        },
+        "tagServiceOwner": {
+            "type": "string",
+            "defaultValue": "James Edwards"
+        },
+        "tagServiceTicketRequestID": {
+            "type": "string",
+            "defaultValue": "TSRxxx"
+        },
+        "tagSource": {
+            "type": "string",
+            "defaultValue": "SAPAzureARMTemplate via servicenow"
+        },
+        "tagProjectName": {
+            "type": "string",
+            "defaultValue": "Newco Project"
+        },
+        "tagCostCodeID": {
+            "type": "string",
+            "defaultValue": "D.4610-01-R01"
+        }
+    },
+    "variables": {
+        "uniqueDeploymentId": "[concat(parameters('vmDeploymentNumber'), '.', toLower(trim(take(parameters('vmRole'),3))),'.', parameters('vmInstanceNumber'))]",
+        "azuredeploy.templatename": "[concat('azuredeploy.', variables('uniqueDeploymentId'))]",
+        "azuredeploy.templateuri": "[uri(deployment().properties.templateLink.uri, 'azuredeploy.json')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "[variables('azuredeploy.templatename')]",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('azuredeploy.templateuri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "debugSetting": {
+                    "detailLevel": "requestContent, responseContent"
+                },
+                "parameters": {
+                    "vmDeploymentNumber": {
+                        "value": "[parameters('vmDeploymentNumber')]"
+                    },
+                    "vmInstanceNumber": {
+                        "value": "[parameters('vmInstanceNumber')]"
+                    },
+                    "vmImage": {
+                        "value": "[parameters('vmImage')]"
+                    },
+                    "vmRole": {
+                        "value": "[parameters('vmRole')]"
+                    },
+                    "vmAdminUserName": {
+                        "value": "[parameters('vmAdminUserName')]"
+                    },
+                    "vmAdminPassword": {
+                        "value": "[parameters('vmAdminPassword')]"
+                    },
+                    "nic1IpAddresses": {
+                        "value": "[parameters('Nic-1')]"
+                    },
+                    "nic2IpAddresses": {
+                        "value": "[parameters('Nic-2')]"
+                    },
+                    "tagServiceOwner": {
+                        "value": "[parameters('tagServiceOwner')]"
+                    },
+                    "tagServiceTicketRequestID": {
+                        "value": "[parameters('tagServiceTicketRequestID')]"
+                    },
+                    "tagSource": {
+                        "value": "[parameters('tagSource')]"
+                    },
+                    "tagProjectName": {
+                        "value": "[parameters('tagProjectName')]"
+                    },
+                    "tagCostCodeID": {
+                        "value": "[parameters('tagCostCodeID')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

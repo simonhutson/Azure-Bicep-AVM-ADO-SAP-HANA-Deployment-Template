@@ -1,0 +1,140 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "params": {
+            "type": "object"
+        }
+    },
+    "variables": {
+        "settings.availabilityset.templatename": "[concat('settings.availabilityset.', parameters('params').uniqueDeploymentId)]",
+        "settings.availabilityset.templateuri": "[uri(deployment().properties.templateLink.uri, 'settings.availabilityset.json')]",
+        "settings.vm.templatename": "[concat('settings.vm.', parameters('params').uniqueDeploymentId)]",
+        "settings.vm.templateuri": "[uri(deployment().properties.templateLink.uri, 'settings.vm.json')]",
+        "settings.nic1.templatename": "[concat('settings.nic1.', parameters('params').uniqueDeploymentId)]",
+        "settings.nic1.templateuri": "[uri(deployment().properties.templateLink.uri, 'settings.nic1.json')]",
+        "settings.nic2.templatename": "[concat('settings.nic2.', parameters('params').uniqueDeploymentId)]",
+        "settings.nic2.templateuri": "[uri(deployment().properties.templateLink.uri, 'settings.nic2.json')]",
+        "settings.customscriptextension.templatename": "[concat('settings.customscriptextension.', parameters('params').uniqueDeploymentId)]",
+        "settings.customscriptextension.templateuri": "[uri(deployment().properties.templateLink.uri, 'settings.customscriptextension.json')]",
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "[variables('settings.availabilityset.templatename')]",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('settings.availabilityset.templateuri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "debugSetting": {
+                    "detailLevel": "requestContent, responseContent"
+                },
+                "parameters": {
+                    "params": {
+                        "value": "[parameters('params')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "[variables('settings.vm.templatename')]",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('settings.vm.templateuri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "debugSetting": {
+                    "detailLevel": "requestContent, responseContent"
+                },
+                "parameters": {
+                    "params": {
+                        "value": "[parameters('params')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "[variables('settings.nic1.templatename')]",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('settings.nic1.templateuri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "debugSetting": {
+                    "detailLevel": "requestContent, responseContent"
+                },
+                "parameters": {
+                    "params": {
+                        "value": "[parameters('params')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "[variables('settings.nic2.templatename')]",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('settings.nic2.templateuri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "debugSetting": {
+                    "detailLevel": "requestContent, responseContent"
+                },
+                "parameters": {
+                    "params": {
+                        "value": "[parameters('params')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "[variables('settings.customscriptextension.templatename')]",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('settings.customscriptextension.templateuri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "debugSetting": {
+                    "detailLevel": "requestContent, responseContent"
+                },
+                "parameters": {
+                    "params": {
+                        "value": "[parameters('params')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "output": {
+            "type": "object",
+            "value": {
+                "availabilitySet": "[reference(variables('settings.availabilityset.templatename')).outputs.output.value]",
+                "vm": "[reference(variables('settings.vm.templatename')).outputs.output.value]",
+                "nic1": "[reference(variables('settings.nic1.templatename')).outputs.output.value]",
+                "nic2": "[reference(variables('settings.nic2.templatename')).outputs.output.value]",
+                "customScriptExtension": "[reference(variables('settings.customscriptextension.templatename')).outputs.output.value]"
+            }
+        }
+    }
+}

@@ -1,0 +1,38 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "params": {
+            "type": "object"
+        }
+    },
+    "variables": {
+        "acceleratedNetworking": {
+            "SAP Dev Test": {
+                "App - NetWeaver Gateway (IMOS)": false,
+                "App - SAP PO (IMOS)": false,
+                "App - Netweaver Gateway FES": false,
+                "App - SAP BW": false,
+                "App - S/4HANA Utilities": false,
+                "App - Convergent Charging": false,
+                "App - Convergent Invoicing": false,
+                "App - SOM (CRM ABAP)": false,
+                "App - SOM (CRM JAVA)": false,
+                "App - Cloud Connector": false,
+                "DB - NetWeaver Gateway (IMOS)": true,
+                "DB - SAP PO (IMOS)": true,
+                "DB - Netweaver Gateway FES": true,
+                "DB - SAP BW": true,
+                "DB - S/4HANA Utilities": true,
+                "DB - S/4HANA Hybris Billing": true
+            }
+        }
+    },
+    "resources": [],
+    "outputs": {
+        "output": {
+            "value": "[variables('acceleratedNetworking')[parameters('params').subscription][parameters('params').vmRole]]",
+            "type": "bool"
+        }
+    }
+}

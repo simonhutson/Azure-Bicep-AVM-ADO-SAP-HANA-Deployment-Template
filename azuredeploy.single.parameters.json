@@ -1,0 +1,42 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmDeploymentNumber": {
+            "value": "00"
+        },
+        "vmInstanceNumber": {
+            "value": "0"
+        },
+        "vmImage": {
+            "value": "Gallery Image - SLES SAP BYOS 12-SP2"
+        },
+        "vmRole": {
+            "value": "App - NetWeaver Gateway (IMOS)"
+        },
+        "vmAdminUserName": {
+            "value": "azureuser"
+        },
+        "Nic-1": {
+            "value": ["","","",""]
+        },
+        "Nic-2": {
+            "value": ["","",""]
+        },
+        "tagServiceOwner": {
+            "value": "[parameters('tagServiceOwner')]"
+        },
+        "tagServiceTicketRequestID": {
+            "value": "[parameters('tagServiceTicketRequestID')]"
+        },
+        "tagSource": {
+            "value": "[parameters('tagSource')]"
+        },
+        "tagProjectName": {
+            "value": "[parameters('tagProjectName')]"
+        },
+        "tagCostCodeID": {
+            "value": "[parameters('tagCostCodeID')]"
+        }
+    }
+}

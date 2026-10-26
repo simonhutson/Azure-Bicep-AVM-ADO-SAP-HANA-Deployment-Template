@@ -1,0 +1,284 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "uniqueDeploymentId": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string",
+            "allowedValues": [
+                "uksouth"
+            ]
+        },
+        "subscription": {
+            "type": "string",
+            "allowedValues": [
+                "SAP Dev Test"
+            ]
+        },
+        "vmDeploymentNumber": {
+            "type": "string"
+        },
+        "vmInstanceNumber": {
+            "type": "string"
+        },
+        "vmImage": {
+            "type": "string",
+            "allowedValues": [
+                "Gallery Image - SLES SAP BYOS 12-SP1",
+                "Gallery Image - SLES SAP BYOS 12-SP2",
+                "Gallery Image - SLES SAP BYOS 12-SP3"
+            ]
+        },
+        "vmRole": {
+            "type": "string",
+            "allowedValues": [
+                "App - NetWeaver Gateway (IMOS)",
+                "App - SAP PO (IMOS)",
+                "App - Netweaver Gateway FES",
+                "App - SAP BW",
+                "App - S/4HANA Utilities",
+                "App - Convergent Charging",
+                "App - Convergent Invoicing",
+                "App - SOM (CRM ABAP)",
+                "App - SOM (CRM JAVA)",
+                "App - Cloud Connector",
+                "DB - NetWeaver Gateway (IMOS)",
+                "DB - SAP PO (IMOS)",
+                "DB - Netweaver Gateway FES",
+                "DB - SAP BW",
+                "DB - S/4HANA Utilities",
+                "DB - S/4HANA Hybris Billing"
+            ]
+        },
+        "vmAdminUserName": {
+            "type": "string",
+            "defaultValue": "azureuser"
+        },
+        "vmAdminPassword": {
+            "type": "securestring"
+        },
+        "nic1IpAddresses": {
+            "type": "array"
+        },
+        "nic2IpAddresses": {
+            "type": "array"
+        },
+        "tagServiceOwner": {
+            "type": "string",
+            "defaultValue": "James Edwards",
+            "metadata": {
+                "description": "Service Owner tag"
+            }
+        },
+        "tagServiceTicketRequestID": {
+            "type": "string",
+            "defaultValue": "TSRxxx",
+            "metadata": {
+                "description": "Service Ticket Request ID tag"
+            }
+        },
+        "tagSource": {
+            "type": "string",
+            "defaultValue": "SAPAzureARMTemplate via servicenow",
+            "metadata": {
+                "description": "Source tag"
+            }
+        },
+        "tagProjectName": {
+            "type": "string",
+            "defaultValue": "Newco Project",
+            "metadata": {
+                "description": "Project Name tag"
+            }
+        },
+        "tagCostCodeID": {
+            "type": "string",
+            "defaultValue": "D.4610-01-R01",
+            "metadata": {
+                "description": "Cost Code ID tag"
+            }
+        }
+    },
+    "variables": {
+        "validate.keyvault.scriptstorageaccountkey.templatename": "[concat('validate.keyvault.scriptstorageaccountkey.', parameters('uniqueDeploymentId'))]",
+        "validate.keyvault.puppetpresharedsecret.templatename": "[concat('validate.keyvault.puppetpresharedsecret.', parameters('uniqueDeploymentId'))]",
+        "validate.keyvault.templateuri": "[uri(deployment().properties.templateLink.uri, 'validate.keyvault.json')]",
+        "KeyVaults": {
+            "SAP Dev Test": {
+                "ukwest": {
+                    "KeyVaultName": "azwudsapstoragekeys",
+                    "KeyVaultResourceGroupName": "azwu-rg-sapdevtest-vmstorageaccounts",
+                    "KeyVaultSecretScriptStorageAccountKey": "StorageAcctKeyVMScripts",
+                    "KeyVaultSecretPuppetPreSharedSecret": "PuppetPreSharedKey",
+                    "KeyVaultSecretTemplateStorageAccountSASToken": "azwusapvmscriptssaskey1"
+                },
+                "uksouth": {
+                    "KeyVaultName": "azsudsapstoragekeys",
+                    "KeyVaultResourceGroupName": "azsu-rg-sapdevtest-vmstorageaccounts",
+                    "KeyVaultSecretScriptStorageAccountKey": "StorageAcctKeyVMScripts",
+                    "KeyVaultSecretPuppetPreSharedSecret": "PuppetPreSharedKey",
+                    "KeyVaultSecretTemplateStorageAccountSASToken": "azsusapvmscriptssaskey1"
+                }
+            }
+        },
+        "KeyVaultResourceId": "[resourceId(variables('KeyVaults')[parameters('subscription')][parameters('location')].KeyVaultResourceGroupName, 'Microsoft.KeyVault/vaults', variables('KeyVaults')[parameters('subscription')][parameters('location')].KeyVaultName)]",
+        "KeyVaultSecretScriptStorageAccountKey": "[variables('KeyVaults')[parameters('subscription')][parameters('location')].KeyVaultSecretScriptStorageAccountKey]",
+        "KeyVaultSecretPuppetPreSharedSecret": "[variables('KeyVaults')[parameters('subscription')][parameters('location')].KeyVaultSecretPuppetPreSharedSecret]",
+        "subscriptionPrefix": {
+            "SAP Dev Test": {
+                "vmPrefix": "d",
+                "asPrefix": "as-sap-devtest"
+            }
+        },
+        "locationPrefix": {
+            "uksouth": "azsu"
+        },
+        "vmRoleName": {
+            "App - NetWeaver Gateway (IMOS)": "sap",
+            "App - SAP PO (IMOS)": "sap",
+            "App - Netweaver Gateway FES": "sap",
+            "App - SAP BW": "sap",
+            "App - S/4HANA Utilities": "sap",
+            "App - Convergent Charging": "sap",
+            "App - Convergent Invoicing": "sap",
+            "App - SOM (CRM ABAP)": "sap",
+            "App - SOM (CRM JAVA)": "sap",
+            "App - Cloud Connector": "sap",
+            "DB - NetWeaver Gateway (IMOS)": "han",
+            "DB - SAP PO (IMOS)": "han",
+            "DB - Netweaver Gateway FES": "han",
+            "DB - SAP BW": "han",
+            "DB - S/4HANA Utilities": "han",
+            "DB - S/4HANA Hybris Billing": "han"
+        },
+        "availabilitySetRoleName": {
+            "App - NetWeaver Gateway (IMOS)": "sap",
+            "App - SAP PO (IMOS)": "sap",
+            "App - Netweaver Gateway FES": "sap",
+            "App - SAP BW": "sap",
+            "App - S/4HANA Utilities": "sap",
+            "App - Convergent Charging": "sap",
+            "App - Convergent Invoicing": "sap",
+            "App - SOM (CRM ABAP)": "sap",
+            "App - SOM (CRM JAVA)": "sap",
+            "App - Cloud Connector": "sap",
+            "DB - NetWeaver Gateway (IMOS)": "han",
+            "DB - SAP PO (IMOS)": "han",
+            "DB - Netweaver Gateway FES": "han",
+            "DB - SAP BW": "han",
+            "DB - S/4HANA Utilities": "han",
+            "DB - S/4HANA Hybris Billing": "han"
+        },
+        "availabilitySetNameSuffix": {
+            "App - NetWeaver Gateway (IMOS)": "nw-gateway",
+            "App - SAP PO (IMOS)": "sap-po",
+            "App - Netweaver Gateway FES": "nw-fes",
+            "App - SAP BW": "bw",
+            "App - S/4HANA Utilities": "utilities",
+            "App - Convergent Charging": "hybris-cc",
+            "App - Convergent Invoicing": "hybris-ci",
+            "App - SOM (CRM ABAP)": "som-abap",
+            "App - SOM (CRM JAVA)": "som-java",
+            "App - Cloud Connector": "cloudconnector",
+            "DB - NetWeaver Gateway (IMOS)": "nwgateway",
+            "DB - SAP PO (IMOS)": "po",
+            "DB - Netweaver Gateway FES": "nwgatewayfes",
+            "DB - SAP BW": "bw",
+            "DB - S/4HANA Utilities": "utilities",
+            "DB - S/4HANA Hybris Billing": "hybrisbilling"
+        },
+        "availabilitySetNamePrefix": "[toLower(concat(variables('locationPrefix')[parameters('location')], '-', variables('subscriptionPrefix')[parameters('subscription')].asPrefix, '-'))]",
+        "availabilitySetName": "[toLower(concat(variables('availabilitySetNamePrefix'), variables('availabilitySetRoleName')[parameters('vmRole')], parameters('vmDeploymentNumber'), '-', variables('availabilitySetNameSuffix')[parameters('vmRole')],'-001'))]",
+        "vmNamePrefix": "[toLower(concat(variables('locationPrefix')[parameters('location')], '-', variables('subscriptionPrefix')[parameters('subscription')].vmPrefix, '-'))]",
+        "vmName": "[toLower(concat(variables('vmNamePrefix'), variables('vmRoleName')[parameters('vmRole')], parameters('vmDeploymentNumber'), parameters('vmInstanceNumber')))]",
+        "nic1Name": "[toLower(concat(variables('vmName'), '-nic-1'))]",
+        "nic2Name": "[toLower(concat(variables('vmName'), '-nic-2'))]",
+        "customScriptExtensionName": "[concat(variables('vmName'), '/script')]",
+        "vmRoleType": "[variables('vmRoleName')[parameters('vmRole')]]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "[variables('validate.keyvault.scriptstorageaccountkey.templatename')]",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('validate.keyvault.templateuri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "debugSetting": {
+                    "detailLevel": "requestContent, responseContent"
+                },
+                "parameters": {
+                    "secret": {
+                        "reference": {
+                            "keyVault": {
+                                "id": "[variables('KeyVaultResourceId')]"
+                            },
+                            "secretName": "[variables('KeyVaultSecretScriptStorageAccountKey')]"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "[variables('validate.keyvault.puppetpresharedsecret.templatename')]",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('validate.keyvault.templateuri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "debugSetting": {
+                    "detailLevel": "requestContent, responseContent"
+                },
+                "parameters": {
+                    "secret": {
+                        "reference": {
+                            "keyVault": {
+                                "id": "[variables('KeyVaultResourceId')]"
+                            },
+                            "secretName": "[variables('KeyVaultSecretPuppetPreSharedSecret')]"
+                        }
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "output": {
+            "type": "object",
+            "value": {
+                "uniqueDeploymentId": "[parameters('uniqueDeploymentId')]",
+                "availabilitySetName": "[variables('availabilitySetName')]",
+                "vmName": "[variables('vmName')]",
+                "nic1Name": "[variables('nic1Name')]",
+                "nic2Name": "[variables('nic2Name')]",
+                "location": "[parameters('location')]",
+                "subscription": "[parameters('subscription')]",
+                "vmImage": "[parameters('vmImage')]",
+                "vmRoleType": "[variables('vmRoleType')]",
+                "vmRole": "[parameters('vmRole')]",
+                "vmAdminUserName": "[parameters('vmAdminUserName')]",
+                "vmAdminPassword": "[parameters('vmAdminPassword')]",
+                "nic1IpAddresses": "[parameters('nic1IpAddresses')]",
+                "nic2IpAddresses": "[parameters('nic2IpAddresses')]",
+                "customScriptExtensionName": "[variables('customScriptExtensionName')]",
+                "scriptStorageAccountKey": "[reference(variables('validate.keyvault.scriptstorageaccountkey.templatename')).outputs.output.value]",
+                "puppetPresharedSecret": "[reference(variables('validate.keyvault.puppetpresharedsecret.templatename')).outputs.output.value]",
+                "tagServiceOwner": "[parameters('tagServiceOwner')]",
+                "tagServiceTicketRequestID": "[parameters('tagServiceTicketRequestID')]",
+                "tagSource": "[parameters('tagSource')]",
+                "tagProjectName": "[parameters('tagProjectName')]",
+                "tagCostCodeID": "[parameters('tagCostCodeID')]"
+            }
+        }
+    }
+}

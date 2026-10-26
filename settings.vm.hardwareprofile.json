@@ -1,0 +1,41 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "params": {
+            "type": "object"
+        }
+    },
+    "variables": {
+        "vmSize": {
+            "SAP Dev Test": {
+                "App - NetWeaver Gateway (IMOS)": "Standard_E4s_v3",
+                "App - SAP PO (IMOS)": "Standard_E4s_v3",
+                "App - Netweaver Gateway FES": "Standard_E4s_v3",
+                "App - SAP BW": "Standard_E4s_v3",
+                "App - S/4HANA Utilities": "Standard_E4s_v3",
+                "App - Convergent Charging": "Standard_E4s_v3",
+                "App - Convergent Invoicing": "Standard_E4s_v3",
+                "App - SOM (CRM ABAP)": "Standard_E4s_v3",
+                "App - SOM (CRM JAVA)": "Standard_E4s_v3",
+                "App - Cloud Connector": "Standard_E4s_v3",
+                "DB - NetWeaver Gateway (IMOS)": "Standard_E8s_v3",
+                "DB - SAP PO (IMOS)": "Standard_E8s_v3",
+                "DB - Netweaver Gateway FES": "Standard_E8s_v3",
+                "DB - SAP BW": "Standard_E16s_v3",
+                "DB - S/4HANA Utilities": "Standard_E32s_v3",
+                "DB - S/4HANA Hybris Billing": "Standard_E32s_v3"
+            }
+        },
+        "hardwareProfile": {
+            "vmSize": "[variables('vmSize')[parameters('params').subscription][parameters('params').vmRole]]"
+        }
+    },
+    "resources": [],
+    "outputs": {
+        "output": {
+            "value": "[variables('hardwareProfile')]",
+            "type": "object"
+        }
+    }
+}

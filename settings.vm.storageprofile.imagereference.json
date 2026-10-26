@@ -1,0 +1,42 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "params": {
+            "type": "object"
+        }
+    },
+    "variables": {
+        "Gallery Image - SLES SAP BYOS 12-SP1": {
+            "imageReference": {
+                "sku": "12-SP1",
+                "offer": "SLES-SAP-BYOS",
+                "publisher": "SUSE",
+                "version": "latest"
+            }
+        },
+        "Gallery Image - SLES SAP BYOS 12-SP2": {
+            "imageReference": {
+                "sku": "12-SP2",
+                "offer": "SLES-SAP-BYOS",
+                "publisher": "SUSE",
+                "version": "latest"
+            }
+        },
+        "Gallery Image - SLES SAP BYOS 12-SP3": {
+            "imageReference": {
+                "sku": "12-SP3",
+                "offer": "SLES-SAP-BYOS",
+                "publisher": "SUSE",
+                "version": "latest"
+            }
+        }
+    },
+    "resources": [],
+    "outputs": {
+        "output": {
+            "value": "[variables(parameters('params').vmImage).imageReference]",
+            "type": "object"
+        }
+    }
+}

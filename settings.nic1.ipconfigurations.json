@@ -1,0 +1,92 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "params": {
+            "type": "object"
+        }
+    },
+    "variables": {
+        "subnets": {
+            "SAP Dev Test": {
+                "uksouth": {
+                    "App - NetWeaver Gateway (IMOS)": {
+                        "id": "[resourceId('azsu-rg-sap-devtest-defaultnetworking-001', 'Microsoft.Network/virtualNetworks/subnets', 'azsu-vnet-devtest-sap-001', 'azsu-subn-devtest-sap-nw-gateway-an-001')]"
+                    },
+                    "App - SAP PO (IMOS)": {
+                        "id": "[resourceId('azsu-rg-sap-devtest-defaultnetworking-001', 'Microsoft.Network/virtualNetworks/subnets', 'azsu-vnet-devtest-sap-001', 'azsu-subn-devtest-sap-nw-pi-an-001')]"
+                    },
+                    "App - Netweaver Gateway FES": {
+                        "id": "[resourceId('azsu-rg-sap-devtest-defaultnetworking-001', 'Microsoft.Network/virtualNetworks/subnets', 'azsu-vnet-devtest-sap-001', 'azsu-subn-devtest-sap-nw-gateway-an-001')]"
+                    },
+                    "App - SAP BW": {
+                        "id": "[resourceId('azsu-rg-sap-devtest-defaultnetworking-001', 'Microsoft.Network/virtualNetworks/subnets', 'azsu-vnet-devtest-sap-001', 'azsu-subn-devtest-sap-bw-an-001')]"
+                    },
+                    "App - S/4HANA Utilities": {
+                        "id": "[resourceId('azsu-rg-sap-devtest-defaultnetworking-001', 'Microsoft.Network/virtualNetworks/subnets', 'azsu-vnet-devtest-sap-001', 'azsu-subn-devtest-sap-utilities-an-001')]"
+                    },
+                    "App - Convergent Charging": {
+                        "id": "[resourceId('azsu-rg-sap-devtest-defaultnetworking-001', 'Microsoft.Network/virtualNetworks/subnets', 'azsu-vnet-devtest-sap-001', 'azsu-subn-devtest-sap-hybris-an-001')]"
+                    },
+                    "App - Convergent Invoicing": {
+                        "id": "[resourceId('azsu-rg-sap-devtest-defaultnetworking-001', 'Microsoft.Network/virtualNetworks/subnets', 'azsu-vnet-devtest-sap-001', 'azsu-subn-devtest-sap-hybris-an-001')]"
+                    },
+                    "App - SOM (CRM ABAP)": {
+                        "id": "[resourceId('azsu-rg-sap-devtest-defaultnetworking-001', 'Microsoft.Network/virtualNetworks/subnets', 'azsu-vnet-devtest-sap-001', 'azsu-subn-devtest-sap-hybris-an-001')]"
+                    },
+                    "App - SOM (CRM JAVA)": {
+                        "id": "[resourceId('azsu-rg-sap-devtest-defaultnetworking-001', 'Microsoft.Network/virtualNetworks/subnets', 'azsu-vnet-devtest-sap-001', 'azsu-subn-devtest-sap-hybris-an-001')]"
+                    },
+                    "App - Cloud Connector": {
+                        "id": "[resourceId('azsu-rg-sap-devtest-defaultnetworking-001', 'Microsoft.Network/virtualNetworks/subnets', 'azsu-vnet-devtest-sap-001', 'azsu-subn-devtest-sap-cloud-connect-an-001')]"
+                    },
+                    "DB - NetWeaver Gateway (IMOS)": {
+                        "id": "[resourceId('azsu-rg-sap-devtest-defaultnetworking-001', 'Microsoft.Network/virtualNetworks/subnets', 'azsu-vnet-devtest-sap-001', 'azsu-subn-devtest-sap-nw-gateway-an-001')]"
+                    },
+                    "DB - SAP PO (IMOS)": {
+                        "id": "[resourceId('azsu-rg-sap-devtest-defaultnetworking-001', 'Microsoft.Network/virtualNetworks/subnets', 'azsu-vnet-devtest-sap-001', 'azsu-subn-devtest-sap-nw-pi-an-001')]"
+                    },
+                    "DB - Netweaver Gateway FES": {
+                        "id": "[resourceId('azsu-rg-sap-devtest-defaultnetworking-001', 'Microsoft.Network/virtualNetworks/subnets', 'azsu-vnet-devtest-sap-001', 'azsu-subn-devtest-sap-nw-gateway-an-001')]"
+                    },
+                    "DB - SAP BW": {
+                        "id": "[resourceId('azsu-rg-sap-devtest-defaultnetworking-001', 'Microsoft.Network/virtualNetworks/subnets', 'azsu-vnet-devtest-sap-001', 'azsu-subn-devtest-sap-bw-an-001')]"
+                    },
+                    "DB - S/4HANA Utilities": {
+                        "id": "[resourceId('azsu-rg-sap-devtest-defaultnetworking-001', 'Microsoft.Network/virtualNetworks/subnets', 'azsu-vnet-devtest-sap-001', 'azsu-subn-devtest-sap-utilities-an-001')]"
+                    },
+                    "DB - S/4HANA Hybris Billing": {
+                        "id": "[resourceId('azsu-rg-sap-devtest-defaultnetworking-001', 'Microsoft.Network/virtualNetworks/subnets', 'azsu-vnet-devtest-sap-001', 'azsu-subn-devtest-sap-hybris-an-001')]"
+                    }
+                }
+            }
+        },
+        "ipConfigurationsObj": {
+            "copy": [
+                {
+                    "name": "ipConfigurations",
+                    "count": "[length(parameters('params').nic1IpAddresses)]",
+                    "input": {
+                        "name": "[concat('ipconfig',padLeft(copyIndex('ipConfigurations'),2,'0'))]",
+                        "properties": {
+                            "privateIPAddress": "[if(equals(parameters('params').nic1IpAddresses[copyIndex('ipConfigurations')],''),'',parameters('params').nic1IpAddresses[copyIndex('ipConfigurations')])]",
+                            "privateIPAllocationMethod": "[if(equals(parameters('params').nic1IpAddresses[copyIndex('ipConfigurations')],''),'Dynamic','Static')]",
+                            "privateIpAddressVersion": "IPv4",
+                            "primary": "[if(equals(copyIndex('ipConfigurations'),0),'true','false')]",
+                            "subnet": {
+                                "id": "[variables('subnets')[parameters('params').subscription][parameters('params').location][parameters('params').vmRole].id]"
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "resources": [],
+    "outputs": {
+        "output": {
+            "value": "[variables('ipConfigurationsObj')[string('ipConfigurations')]]",
+            "type": "array"
+        }
+    }
+}

@@ -1,0 +1,213 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmDeploymentNumber": {
+            "type": "string",
+            "maxLength": 2,
+            "minLength": 2,
+            "metadata": {
+                "description": "Unique, 2-digit deployment number, e.g. 20"
+            }
+        },
+        "vmImage": {
+            "type": "string",
+            "allowedValues": [
+                "Gallery Image - SLES SAP BYOS 12-SP1",
+                "Gallery Image - SLES SAP BYOS 12-SP2",
+                "Gallery Image - SLES SAP BYOS 12-SP3"
+            ],
+            "defaultValue": "Gallery Image - SLES SAP BYOS 12-SP2",
+            "metadata": {
+                "description": "The Virtual Machine operating system you want to deploy"
+            }
+        },
+        "vmAdminUserName": {
+            "type": "string",
+            "defaultValue": "azureuser"
+        },
+        "vmAdminPassword": {
+            "type": "securestring"
+        },
+        "App-S/4HANAUtilities-Nic-1": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["","","",""],
+            "metadata": {
+                "description": "Array of static IP addresses for App-S/4HANAUtilities-Nic-1. If any address is blank, DHCP will be used"
+            }
+        },
+        "App-S/4HANAUtilities-Nic-2": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["","",""],
+            "metadata": {
+                "description": "Array of static IP addresses for App-S/4HANAUtilities-Nic-2. If any address is blank, DHCP will be used"
+            }
+        },
+        "Db-Utilities-Nic-1": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["",""],
+            "metadata": {
+                "description": "Array of static IP addresses for Db-Utilities-Nic-1. If any address is blank, DHCP will be used"
+            }
+        },
+        "Db-Utilities-Nic-2": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["",""],
+            "metadata": {
+                "description": "Array of static IP addresses for Db-Utilities-Nic-2. If any address is blank, DHCP will be used"
+            }
+        },
+        "tagServiceOwner": {
+            "type": "string",
+            "defaultValue": "James Edwards"
+        },
+        "tagServiceTicketRequestID": {
+            "type": "string",
+            "defaultValue": "TSRxxx"
+        },
+        "tagSource": {
+            "type": "string",
+            "defaultValue": "SAPAzureARMTemplate via servicenow"
+        },
+        "tagProjectName": {
+            "type": "string",
+            "defaultValue": "Newco Project"
+        },
+        "tagCostCodeID": {
+            "type": "string",
+            "defaultValue": "D.4610-01-R01"
+        }
+    },
+    "variables": {
+        "uniqueDeploymentId.App.4": "[concat(parameters('vmDeploymentNumber'), '.app.4')]",
+        "azuredeploy.App.4.templatename": "[concat('azuredeploy.', variables('uniqueDeploymentId.App.4'))]",
+        "uniqueDeploymentId.Db.4": "[concat(parameters('vmDeploymentNumber'), '.db.4')]",
+        "azuredeploy.Db.4.templatename": "[concat('azuredeploy.', variables('uniqueDeploymentId.Db.4'))]",
+        "azuredeploy.templateuri": "[uri(deployment().properties.templateLink.uri, 'azuredeploy.json')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "[variables('azuredeploy.App.4.templatename')]",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('azuredeploy.templateuri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "debugSetting": {
+                    "detailLevel": "requestContent, responseContent"
+                },
+                "parameters": {
+                    "vmDeploymentNumber": {
+                        "value": "[parameters('vmDeploymentNumber')]"
+                    },
+                    "vmInstanceNumber": {
+                        "value": "4"
+                    },
+                    "vmImage": {
+                        "value": "[parameters('vmImage')]"
+                    },
+                    "vmRole": {
+                        "value": "App - S/4HANA Utilities"
+                    },
+                    "vmAdminUserName": {
+                        "value": "[parameters('vmAdminUserName')]"
+                    },
+                    "vmAdminPassword": {
+                        "value": "[parameters('vmAdminPassword')]"
+                    },
+                    "nic1IpAddresses": {
+                        "value": "[parameters('App-S/4HANAUtilities-Nic-1')]"
+                    },
+                    "nic2IpAddresses": {
+                        "value": "[parameters('App-S/4HANAUtilities-Nic-2')]"
+                    },
+                    "tagServiceOwner": {
+                        "value": "[parameters('tagServiceOwner')]"
+                    },
+                    "tagServiceTicketRequestID": {
+                        "value": "[parameters('tagServiceTicketRequestID')]"
+                    },
+                    "tagSource": {
+                        "value": "[parameters('tagSource')]"
+                    },
+                    "tagProjectName": {
+                        "value": "[parameters('tagProjectName')]"
+                    },
+                    "tagCostCodeID": {
+                        "value": "[parameters('tagCostCodeID')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "[variables('azuredeploy.Db.4.templatename')]",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('azuredeploy.templateuri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "debugSetting": {
+                    "detailLevel": "requestContent, responseContent"
+                },
+                "parameters": {
+                    "vmDeploymentNumber": {
+                        "value": "[parameters('vmDeploymentNumber')]"
+                    },
+                    "vmInstanceNumber": {
+                        "value": "4"
+                    },
+                    "vmImage": {
+                        "value": "[parameters('vmImage')]"
+                    },
+                    "vmRole": {
+                        "value": "DB - S/4HANA Utilities"
+                    },
+                    "vmAdminUserName": {
+                        "value": "[parameters('vmAdminUserName')]"
+                    },
+                    "vmAdminPassword": {
+                        "value": "[parameters('vmAdminPassword')]"
+                    },
+                    "nic1IpAddresses": {
+                        "value": "[parameters('Db-Utilities-Nic-1')]"
+                    },
+                    "nic2IpAddresses": {
+                        "value": "[parameters('Db-Utilities-Nic-2')]"
+                    },
+                    "tagServiceOwner": {
+                        "value": "[parameters('tagServiceOwner')]"
+                    },
+                    "tagServiceTicketRequestID": {
+                        "value": "[parameters('tagServiceTicketRequestID')]"
+                    },
+                    "tagSource": {
+                        "value": "[parameters('tagSource')]"
+                    },
+                    "tagProjectName": {
+                        "value": "[parameters('tagProjectName')]"
+                    },
+                    "tagCostCodeID": {
+                        "value": "[parameters('tagCostCodeID')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

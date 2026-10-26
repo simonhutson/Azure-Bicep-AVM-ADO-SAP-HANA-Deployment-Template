@@ -1,0 +1,33 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "params": {
+            "type": "object"
+        },
+        "tags": {
+            "type": "object"
+        },
+        "properties": {
+            "type": "object"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2018-06-01",
+            "name": "[parameters('params').customScriptExtensionName]",
+            "location": "[parameters('params').location]",
+            "tags": "[parameters('tags')]",
+            "dependsOn": [],
+            "properties": "[parameters('properties')]"
+        }
+    ],
+    "outputs": {
+        "output": {
+            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/extensions', split(parameters('params').customScriptExtensionName,'/')[0], split(parameters('params').customScriptExtensionName,'/')[1]))]",
+            "type": "object"
+        }
+    }
+}

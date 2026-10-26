@@ -1,0 +1,213 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmDeploymentNumber": {
+            "type": "string",
+            "maxLength": 2,
+            "minLength": 2,
+            "metadata": {
+                "description": "Unique, 2-digit deployment number, e.g. 20"
+            }
+        },
+        "vmImage": {
+            "type": "string",
+            "allowedValues": [
+                "Gallery Image - SLES SAP BYOS 12-SP1",
+                "Gallery Image - SLES SAP BYOS 12-SP2",
+                "Gallery Image - SLES SAP BYOS 12-SP3"
+            ],
+            "defaultValue": "Gallery Image - SLES SAP BYOS 12-SP2",
+            "metadata": {
+                "description": "The Virtual Machine operating system you want to deploy"
+            }
+        },
+        "vmAdminUserName": {
+            "type": "string",
+            "defaultValue": "azureuser"
+        },
+        "vmAdminPassword": {
+            "type": "securestring"
+        },
+        "App-SAPBW-Nic-1": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["","","",""],
+            "metadata": {
+                "description": "Array of static IP addresses for App-SAPBW-Nic-1. If any address is blank, DHCP will be used"
+            }
+        },
+        "App-SAPBW-Nic-2": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["","",""],
+            "metadata": {
+                "description": "Array of static IP addresses for App-SAPBW-Nic-2. If any address is blank, DHCP will be used"
+            }
+        },
+        "Db-SAPBW-Nic-1": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["",""],
+            "metadata": {
+                "description": "Array of static IP addresses for Db-SAPBW-Nic-1. If any address is blank, DHCP will be used"
+            }
+        },
+        "Db-SAPBW-Nic-2": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["",""],
+            "metadata": {
+                "description": "Array of static IP addresses for Db-SAPBW-Nic-2. If any address is blank, DHCP will be used"
+            }
+        },
+        "tagServiceOwner": {
+            "type": "string",
+            "defaultValue": "James Edwards"
+        },
+        "tagServiceTicketRequestID": {
+            "type": "string",
+            "defaultValue": "TSRxxx"
+        },
+        "tagSource": {
+            "type": "string",
+            "defaultValue": "SAPAzureARMTemplate via servicenow"
+        },
+        "tagProjectName": {
+            "type": "string",
+            "defaultValue": "Newco Project"
+        },
+        "tagCostCodeID": {
+            "type": "string",
+            "defaultValue": "D.4610-01-R01"
+        }
+    },
+    "variables": {
+        "uniqueDeploymentId.App.3": "[concat(parameters('vmDeploymentNumber'), '.app.3')]",
+        "azuredeploy.App.3.templatename": "[concat('azuredeploy.', variables('uniqueDeploymentId.App.3'))]",
+        "uniqueDeploymentId.Db.3": "[concat(parameters('vmDeploymentNumber'), '.db.3')]",
+        "azuredeploy.Db.3.templatename": "[concat('azuredeploy.', variables('uniqueDeploymentId.Db.3'))]",
+        "azuredeploy.templateuri": "[uri(deployment().properties.templateLink.uri, 'azuredeploy.json')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "[variables('azuredeploy.App.3.templatename')]",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('azuredeploy.templateuri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "debugSetting": {
+                    "detailLevel": "requestContent, responseContent"
+                },
+                "parameters": {
+                    "vmDeploymentNumber": {
+                        "value": "[parameters('vmDeploymentNumber')]"
+                    },
+                    "vmInstanceNumber": {
+                        "value": "3"
+                    },
+                    "vmImage": {
+                        "value": "[parameters('vmImage')]"
+                    },
+                    "vmRole": {
+                        "value": "App - SAP BW"
+                    },
+                    "vmAdminUserName": {
+                        "value": "[parameters('vmAdminUserName')]"
+                    },
+                    "vmAdminPassword": {
+                        "value": "[parameters('vmAdminPassword')]"
+                    },
+                    "nic1IpAddresses": {
+                        "value": "[parameters('App-SAPBW-Nic-1')]"
+                    },
+                    "nic2IpAddresses": {
+                        "value": "[parameters('App-SAPBW-Nic-2')]"
+                    },
+                    "tagServiceOwner": {
+                        "value": "[parameters('tagServiceOwner')]"
+                    },
+                    "tagServiceTicketRequestID": {
+                        "value": "[parameters('tagServiceTicketRequestID')]"
+                    },
+                    "tagSource": {
+                        "value": "[parameters('tagSource')]"
+                    },
+                    "tagProjectName": {
+                        "value": "[parameters('tagProjectName')]"
+                    },
+                    "tagCostCodeID": {
+                        "value": "[parameters('tagCostCodeID')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "[variables('azuredeploy.Db.3.templatename')]",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('azuredeploy.templateuri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "debugSetting": {
+                    "detailLevel": "requestContent, responseContent"
+                },
+                "parameters": {
+                    "vmDeploymentNumber": {
+                        "value": "[parameters('vmDeploymentNumber')]"
+                    },
+                    "vmInstanceNumber": {
+                        "value": "3"
+                    },
+                    "vmImage": {
+                        "value": "[parameters('vmImage')]"
+                    },
+                    "vmRole": {
+                        "value": "DB - SAP BW"
+                    },
+                    "vmAdminUserName": {
+                        "value": "[parameters('vmAdminUserName')]"
+                    },
+                    "vmAdminPassword": {
+                        "value": "[parameters('vmAdminPassword')]"
+                    },
+                    "nic1IpAddresses": {
+                        "value": "[parameters('Db-SAPBW-Nic-1')]"
+                    },
+                    "nic2IpAddresses": {
+                        "value": "[parameters('Db-SAPBW-Nic-2')]"
+                    },
+                    "tagServiceOwner": {
+                        "value": "[parameters('tagServiceOwner')]"
+                    },
+                    "tagServiceTicketRequestID": {
+                        "value": "[parameters('tagServiceTicketRequestID')]"
+                    },
+                    "tagSource": {
+                        "value": "[parameters('tagSource')]"
+                    },
+                    "tagProjectName": {
+                        "value": "[parameters('tagProjectName')]"
+                    },
+                    "tagCostCodeID": {
+                        "value": "[parameters('tagCostCodeID')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

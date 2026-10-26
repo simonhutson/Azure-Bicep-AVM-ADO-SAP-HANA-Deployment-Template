@@ -1,0 +1,168 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "params": {
+            "type": "object"
+        }
+    },
+    "variables": {
+        "StorageAccounts": {
+            "SAP Dev Test": {
+                "ukwest": {
+                    "StorageAccountName": "azwudsapvmscripts",
+                    "Container": "suse-bootstrap-scripts-v1"
+                },
+                "uksouth": {
+                    "StorageAccountName": "azsudsapvmscripts",
+                    "Container": "suse-bootstrap-scripts-v1"
+                }
+            }
+        },
+        "Scripts": {
+            "SAP Dev Test": {
+                "App - NetWeaver Gateway (IMOS)": {
+                    "DiskConfigScript": "sles-bootstrap-diskconfig.sh",
+                    "DiskConfigScriptArgs": "-luns 1 -names usrsap -paths /usr/sap -sizes 100",
+                    "PuppetScriptArgs": "[concat('uksouth dev sap::app ', parameters('params').puppetPresharedSecret)]"
+                },
+                "pp - SAP PO (IMOS)": {
+                    "DiskConfigScript": "sles-bootstrap-diskconfig.sh",
+                    "DiskConfigScriptArgs": "-luns 1 -names usrsap -paths /usr/sap -sizes 100",
+                    "PuppetScriptArgs": "[concat('uksouth dev sap::app ', parameters('params').puppetPresharedSecret)]"
+                },
+                "App - Netweaver Gateway FES": {
+                    "DiskConfigScript": "sles-bootstrap-diskconfig.sh",
+                    "DiskConfigScriptArgs": "-luns 1 -names usrsap -paths /usr/sap -sizes 100",
+                    "PuppetScriptArgs": "[concat('uksouth dev sap::app ', parameters('params').puppetPresharedSecret)]"
+                },
+                "App - SAP BW": {
+                    "DiskConfigScript": "sles-bootstrap-diskconfig.sh",
+                    "DiskConfigScriptArgs": "-luns 1 -names usrsap -paths /usr/sap -sizes 100",
+                    "PuppetScriptArgs": "[concat('uksouth dev sap::app ', parameters('params').puppetPresharedSecret)]"
+                },
+                "App - S/4HANA Utilities": {
+                    "DiskConfigScript": "sles-bootstrap-diskconfig.sh",
+                    "DiskConfigScriptArgs": "-luns 1 -names usrsap -paths /usr/sap -sizes 100",
+                    "PuppetScriptArgs": "[concat('uksouth dev sap::app ', parameters('params').puppetPresharedSecret)]"
+                },
+                "App - Convergent Charging": {
+                    "DiskConfigScript": "sles-bootstrap-diskconfig.sh",
+                    "DiskConfigScriptArgs": "-luns 1 -names usrsap -paths /usr/sap -sizes 100",
+                    "PuppetScriptArgs": "[concat('uksouth dev sap::app ', parameters('params').puppetPresharedSecret)]"
+                },
+                "App - Convergent Invoicing": {
+                    "DiskConfigScript": "sles-bootstrap-diskconfig.sh",
+                    "DiskConfigScriptArgs": "-luns 1 -names usrsap -paths /usr/sap -sizes 100",
+                    "PuppetScriptArgs": "[concat('uksouth dev sap::app ', parameters('params').puppetPresharedSecret)]"
+                },
+                "App - SOM (CRM ABAP)": {
+                    "DiskConfigScript": "sles-bootstrap-diskconfig.sh",
+                    "DiskConfigScriptArgs": "-luns 1 -names usrsap -paths /usr/sap -sizes 100",
+                    "PuppetScriptArgs": "[concat('uksouth dev sap::app ', parameters('params').puppetPresharedSecret)]"
+                },
+                "App - SOM (CRM JAVA)": {
+                    "DiskConfigScript": "sles-bootstrap-diskconfig.sh",
+                    "DiskConfigScriptArgs": "-luns 1 -names usrsap -paths /usr/sap -sizes 100",
+                    "PuppetScriptArgs": "[concat('uksouth dev sap::app ', parameters('params').puppetPresharedSecret)]"
+                },
+                "App - Cloud Connector": {
+                    "DiskConfigScript": "sles-bootstrap-diskconfig.sh",
+                    "DiskConfigScriptArgs": "-luns 1 -names usrsap -paths /usr/sap -sizes 100",
+                    "PuppetScriptArgs": "[concat('uksouth dev sap::app ', parameters('params').puppetPresharedSecret)]"
+                },
+                "DB - NetWeaver Gateway (IMOS)": {
+                    "DiskConfigScript": "sles-bootstrap-diskconfig.sh",
+                    "DiskConfigScriptArgs": "-luns '1#2,3,4#5,6#7#8' -names 'usrsap#data#log#shared#backup' -paths '/usr/sap#/hana/data#/hana/log#/hana/shared#/hana/backup' -sizes '100#100#100#100#100'",
+                    "PuppetScriptArgs": "[concat('uksouth dev sap::hana ', parameters('params').puppetPresharedSecret)]"
+                },
+                "DB - SAP PO (IMOS)": {
+                    "DiskConfigScript": "sles-bootstrap-diskconfig.sh",
+                    "DiskConfigScriptArgs": "-luns '1#2,3,4#5,6#7#8' -names 'usrsap#data#log#shared#backup' -paths '/usr/sap#/hana/data#/hana/log#/hana/shared#/hana/backup' -sizes '100#100#100#100#100'",
+                    "PuppetScriptArgs": "[concat('uksouth dev sap::hana ', parameters('params').puppetPresharedSecret)]"
+                },
+                "DB - Netweaver Gateway FES": {
+                    "DiskConfigScript": "sles-bootstrap-diskconfig.sh",
+                    "DiskConfigScriptArgs": "-luns '1#2,3,4#5,6#7#8' -names 'usrsap#data#log#shared#backup' -paths '/usr/sap#/hana/data#/hana/log#/hana/shared#/hana/backup' -sizes '100#100#100#100#100'",
+                    "PuppetScriptArgs": "[concat('uksouth dev sap::hana ', parameters('params').puppetPresharedSecret)]"
+                },
+                "DB - SAP BW": {
+                    "DiskConfigScript": "sles-bootstrap-diskconfig.sh",
+                    "DiskConfigScriptArgs": "-luns '1#2,3,4#5,6#7#8' -names 'usrsap#data#log#shared#backup' -paths '/usr/sap#/hana/data#/hana/log#/hana/shared#/hana/backup' -sizes '100#100#100#100#100'",
+                    "PuppetScriptArgs": "[concat('uksouth dev sap::hana ', parameters('params').puppetPresharedSecret)]"
+                },
+                "DB - S/4HANA Utilities": {
+                    "DiskConfigScript": "sles-bootstrap-diskconfig.sh",
+                    "DiskConfigScriptArgs": "-luns '1#2,3#4,5#6#7#8,9#10,11#12#13,14,15#16,17#18#19' -names 'usrsap#dataci#logci#sharedci#backupci#datacc#logcc#sharedcc#datasom#logsom#sharedsom#backupsom' -paths '/usr/sap#/hana/data/DE2#/hana/log/DE2#/hana/shared/DE2#/hana/backup/DE2#/hana/data/CE2#/hana/log/CE2#/hana/shared/CE2#/hana/data/HE2#/hana/log/HE2#/hana/shared/HE2#/hana/backup/HE2' -sizes '100#100#100#100#100#100#100#100#100#100#100#100'",
+                    "PuppetScriptArgs": "[concat('uksouth dev sap::hana ', parameters('params').puppetPresharedSecret)]"
+                },
+                "DB - S/4HANA Hybris Billing": {
+                    "DiskConfigScript": "sles-bootstrap-diskconfig.sh",
+                    "DiskConfigScriptArgs": "-luns '1#2,3,4#5,6#7#8' -names 'usrsap#data#log#shared#backup' -paths '/usr/sap#/hana/data#/hana/log#/hana/shared#/hana/backup' -sizes '100#100#100#100#100'",
+                    "PuppetScriptArgs": "[concat('uksouth dev sap::hana ', parameters('params').puppetPresharedSecret)]"
+                }
+            }
+        },
+        "ScriptStorageAccountName": "[variables('StorageAccounts')[parameters('params').subscription][parameters('params').location].StorageAccountName]",
+        "ScriptStorageAccountContainer": "[variables('StorageAccounts')[parameters('params').subscription][parameters('params').location].Container]",
+        "ScriptStorageAccountURI": "[concat('https://',variables('ScriptStorageAccountName'),'.blob.core.windows.net/',variables('ScriptStorageAccountContainer'),'/')]",
+        "ScriptPath": "/var/lib/waagent/custom-script/download/0/",
+        "Lun0DiskConfigScript": "sles-bootstrap-lun0.sh",
+        "Lun0DiskConfigScriptURI": "[concat(variables('ScriptStorageAccountURI'),variables('Lun0DiskConfigScript'))]",
+        "Lun0DiskConfigScriptPath": "[concat(variables('ScriptPath'),variables('Lun0DiskConfigScript'))]",
+        "Lun0DiskConfigScriptArgs": "[parameters('params').vmAdminUserName]",
+        "Lun0DiskConfigScriptCommand": "[concat('while [ ! -f ',variables('Lun0DiskConfigScriptPath'),' ];do sleep 1;done;sleep 10;cat ',variables('Lun0DiskConfigScriptPath'),' | sh -s -- ',variables('Lun0DiskConfigScriptArgs'),';')]",
+        "DiskConfigScript": "[variables('Scripts')[parameters('params').subscription][parameters('params').vmRole].DiskConfigScript]",
+        "DiskConfigScriptURI": "[concat(variables('ScriptStorageAccountURI'),variables('DiskConfigScript'))]",
+        "DiskConfigScriptPath": "[concat(variables('ScriptPath'),variables('DiskConfigScript'))]",
+        "DiskConfigScriptArgs": "[variables('Scripts')[parameters('params').subscription][parameters('params').vmRole].DiskConfigScriptArgs]",
+        "DiskConfigScriptCommand": "[concat('while [ ! -f ',variables('DiskConfigScriptPath'),' ];do sleep 1;done;sleep 10;cat ',variables('DiskConfigScriptPath'),' | sh -s -- ',variables('DiskConfigScriptArgs'),';')]",
+        "SuseClientScript": "sles-bootstrap-suseclient.sh",
+        "SuseClientScriptURI": "[concat(variables('ScriptStorageAccountURI'),variables('SuseClientScript'))]",
+        "SuseClientScriptPath": "[concat(variables('ScriptPath'),variables('SuseClientScript'))]",
+        "SuseClientScriptArgs": "",
+        "SuseClientScriptCommand": "[concat('while [ ! -f ',variables('SuseClientScriptPath'),' ];do sleep 1;done;sleep 10;cat ',variables('SuseClientScriptPath'),' | sh -s -- ',variables('SuseClientScriptArgs'),';')]",
+        "ProxyScript": "sles-bootstrap-proxy.sh",
+        "ProxyScriptURI": "[concat(variables('ScriptStorageAccountURI'),variables('ProxyScript'))]",
+        "ProxyScriptPath": "[concat(variables('ScriptPath'),variables('ProxyScript'))]",
+        "ProxyScriptArgs": "[parameters('params').location]",
+        "ProxyScriptCommand": "[concat('while [ ! -f ',variables('ProxyScriptPath'),' ];do sleep 1;done;sleep 10;cat ',variables('ProxyScriptPath'),' | sh -s -- ',variables('ProxyScriptArgs'),';')]",
+        "DnsScript": "sles-bootstrap-dns.sh",
+        "DnsScriptURI": "[concat(variables('ScriptStorageAccountURI'),variables('DnsScript'))]",
+        "DnsScriptPath": "[concat(variables('ScriptPath'),variables('DnsScript'))]",
+        "DnsScriptArgs": "[parameters('params').location]",
+        "DnsScriptCommand": "[concat('while [ ! -f ',variables('DnsScriptPath'),' ];do sleep 1;done;sleep 10;cat ',variables('DnsScriptPath'),' | sh -s -- ',variables('DnsScriptArgs'),';')]",
+        "PuppetScript": "sles-bootstrap-puppet.sh",
+        "PuppetScriptURI": "[concat(variables('ScriptStorageAccountURI'),variables('PuppetScript'))]",
+        "PuppetScriptPath": "[concat(variables('ScriptPath'),variables('PuppetScript'))]",
+        "PuppetScriptArgs": "[variables('Scripts')[parameters('params').subscription][parameters('params').vmRole].PuppetScriptArgs]",
+        "PuppetScriptCommand": "[concat('while [ ! -f ',variables('PuppetScriptPath'),' ];do sleep 1;done;sleep 10;cat ',variables('PuppetScriptPath'),' | sh -s -- ',variables('PuppetScriptArgs'),';')]"
+    },
+    "resources": [],
+    "outputs": {
+        "output": {
+            "value": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[variables('Lun0DiskConfigScriptURI')]",
+                        "[variables('DiskConfigScriptURI')]",
+                        "[variables('SuseClientScriptURI')]",
+                        "[variables('ProxyScriptURI')]",
+                        "[variables('DnsScriptURI')]",
+                        "[variables('PuppetScriptURI')]"
+                    ],
+                    "commandToExecute": "[concat(variables('Lun0DiskConfigScriptCommand'),variables('DiskConfigScriptCommand'),variables('SuseClientScriptCommand'),variables('ProxyScriptCommand'),variables('DnsScriptCommand'),variables('PuppetScriptCommand'))]"
+                },
+                "protectedSettings": {
+                    "storageAccountName": "[variables('ScriptStorageAccountName')]",
+                    "storageAccountKey": "[parameters('params').ScriptStorageAccountKey]"
+                }
+            },
+            "type": "object"
+        }
+    }
+}

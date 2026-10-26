@@ -1,0 +1,42 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmDeploymentNumber": {
+            "value": "00"
+        },
+        "vmImage": {
+            "value": "Gallery Image - SLES SAP BYOS 12-SP2"
+        },
+        "vmAdminUserName": {
+            "value": "azureuser"
+        },
+        "App-SAPPO-Nic-1": {
+            "value": ["","","",""]
+        },
+        "App-SAPPO-Nic-2": {
+            "value": ["","",""]
+        },
+        "Db-SAPPO-Nic-1": {
+            "value": ["",""]
+        },
+        "Db-SAPPO-Nic-2": {
+            "value": ["",""]
+        },
+        "tagServiceOwner": {
+            "value": "[parameters('tagServiceOwner')]"
+        },
+        "tagServiceTicketRequestID": {
+            "value": "[parameters('tagServiceTicketRequestID')]"
+        },
+        "tagSource": {
+            "value": "[parameters('tagSource')]"
+        },
+        "tagProjectName": {
+            "value": "[parameters('tagProjectName')]"
+        },
+        "tagCostCodeID": {
+            "value": "[parameters('tagCostCodeID')]"
+        }
+    }
+}

@@ -1,0 +1,444 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmDeploymentNumber": {
+            "type": "string",
+            "maxLength": 2,
+            "minLength": 2,
+            "metadata": {
+                "description": "Unique, 2-digit deployment number, e.g. 20"
+            }
+        },
+        "vmImage": {
+            "type": "string",
+            "allowedValues": [
+                "Gallery Image - SLES SAP BYOS 12-SP1",
+                "Gallery Image - SLES SAP BYOS 12-SP2",
+                "Gallery Image - SLES SAP BYOS 12-SP3"
+            ],
+            "defaultValue": "Gallery Image - SLES SAP BYOS 12-SP2",
+            "metadata": {
+                "description": "The Virtual Machine operating system you want to deploy"
+            }
+        },
+        "vmAdminUserName": {
+            "type": "string",
+            "defaultValue": "azureuser"
+        },
+        "vmAdminPassword": {
+            "type": "securestring"
+        },
+        "App-ConvergentCharging-Nic-1": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["","",""],
+            "metadata": {
+                "description": "Array of static IP addresses for App-ConvergentCharging-Nic-1. If any address is blank, DHCP will be used"
+            }
+        },
+        "App-ConvergentCharging-Nic-2": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["","",""],
+            "metadata": {
+                "description": "Array of static IP addresses for App-ConvergentCharging-Nic-2. If any address is blank, DHCP will be used"
+            }
+        },
+        "App-ConvergentInvoicing-Nic-1": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["","",""],
+            "metadata": {
+                "description": "Array of static IP addresses for App-ConvergentInvoicing-Nic-1. If any address is blank, DHCP will be used"
+            }
+        },
+        "App-ConvergentInvoicing-Nic-2": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["","",""],
+            "metadata": {
+                "description": "Array of static IP addresses for App-ConvergentInvoicing-Nic-2. If any address is blank, DHCP will be used"
+            }
+        },
+        "App-SOMCRMABAP-Nic-1": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["","",""],
+            "metadata": {
+                "description": "Array of static IP addresses for App-SOMCRMABAP-Nic-1. If any address is blank, DHCP will be used"
+            }
+        },
+        "App-SOMCRMABAP-Nic-2": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["","",""],
+            "metadata": {
+                "description": "Array of static IP addresses for App-SOMCRMABAP-Nic-2. If any address is blank, DHCP will be used"
+            }
+        },
+        "App-SOMCRMJAVA-Nic-1": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["","",""],
+            "metadata": {
+                "description": "Array of static IP addresses for App-SOMCRMJava-Nic-1. If any address is blank, DHCP will be used"
+            }
+        },
+        "App-SOMCRMJAVA-Nic-2": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["","",""],
+            "metadata": {
+                "description": "Array of static IP addresses for App-SOMCRMJava-Nic-2. If any address is blank, DHCP will be used"
+            }
+        },
+        "Db-Hybris-Nic-1": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["","","",""],
+            "metadata": {
+                "description": "Array of static IP addresses for Db-Hybris-Nic-1. If any address is blank, DHCP will be used"
+            }
+        },
+        "Db-Hybris-Nic-2": {
+            "type": "array",
+            "minLength": 1,
+            "maxLength": 4,
+            "defaultValue": ["","","",""],
+            "metadata": {
+                "description": "Array of static IP addresses for Db-Hybris-Nic-2. If any address is blank, DHCP will be used"
+            }
+        },
+        "tagServiceOwner": {
+            "type": "string",
+            "defaultValue": "James Edwards"
+        },
+        "tagServiceTicketRequestID": {
+            "type": "string",
+            "defaultValue": "TSRxxx"
+        },
+        "tagSource": {
+            "type": "string",
+            "defaultValue": "SAPAzureARMTemplate via servicenow"
+        },
+        "tagProjectName": {
+            "type": "string",
+            "defaultValue": "Newco Project"
+        },
+        "tagCostCodeID": {
+            "type": "string",
+            "defaultValue": "D.4610-01-R01"
+        }
+    },
+    "variables": {
+        "uniqueDeploymentId.App.5": "[concat(parameters('vmDeploymentNumber'), '.app.5')]",
+        "azuredeploy.App.5.templatename": "[concat('azuredeploy.', variables('uniqueDeploymentId.App.5'))]",
+        "uniqueDeploymentId.App.6": "[concat(parameters('vmDeploymentNumber'), '.app.6')]",
+        "azuredeploy.App.6.templatename": "[concat('azuredeploy.', variables('uniqueDeploymentId.App.6'))]",
+        "uniqueDeploymentId.App.7": "[concat(parameters('vmDeploymentNumber'), '.app.7')]",
+        "azuredeploy.App.7.templatename": "[concat('azuredeploy.', variables('uniqueDeploymentId.App.7'))]",
+        "uniqueDeploymentId.App.8": "[concat(parameters('vmDeploymentNumber'), '.app.8')]",
+        "azuredeploy.App.8.templatename": "[concat('azuredeploy.', variables('uniqueDeploymentId.App.8'))]",
+        "uniqueDeploymentId.Db.5": "[concat(parameters('vmDeploymentNumber'), '.db.5')]",
+        "azuredeploy.Db.5.templatename": "[concat('azuredeploy.', variables('uniqueDeploymentId.Db.5'))]",
+        "azuredeploy.templateuri": "[uri(deployment().properties.templateLink.uri, 'azuredeploy.json')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "[variables('azuredeploy.App.5.templatename')]",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('azuredeploy.templateuri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "debugSetting": {
+                    "detailLevel": "requestContent, responseContent"
+                },
+                "parameters": {
+                    "vmDeploymentNumber": {
+                        "value": "[parameters('vmDeploymentNumber')]"
+                    },
+                    "vmInstanceNumber": {
+                        "value": "5"
+                    },
+                    "vmImage": {
+                        "value": "[parameters('vmImage')]"
+                    },
+                    "vmRole": {
+                        "value": "App - Convergent Charging"
+                    },
+                    "vmAdminUserName": {
+                        "value": "[parameters('vmAdminUserName')]"
+                    },
+                    "vmAdminPassword": {
+                        "value": "[parameters('vmAdminPassword')]"
+                    },
+                    "nic1IpAddresses": {
+                        "value": "[parameters('App-ConvergentCharging-Nic-1')]"
+                    },
+                    "nic2IpAddresses": {
+                        "value": "[parameters('App-ConvergentCharging-Nic-2')]"
+                    },
+                    "tagServiceOwner": {
+                        "value": "[parameters('tagServiceOwner')]"
+                    },
+                    "tagServiceTicketRequestID": {
+                        "value": "[parameters('tagServiceTicketRequestID')]"
+                    },
+                    "tagSource": {
+                        "value": "[parameters('tagSource')]"
+                    },
+                    "tagProjectName": {
+                        "value": "[parameters('tagProjectName')]"
+                    },
+                    "tagCostCodeID": {
+                        "value": "[parameters('tagCostCodeID')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "[variables('azuredeploy.App.6.templatename')]",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('azuredeploy.templateuri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "debugSetting": {
+                    "detailLevel": "requestContent, responseContent"
+                },
+                "parameters": {
+                    "vmDeploymentNumber": {
+                        "value": "[parameters('vmDeploymentNumber')]"
+                    },
+                    "vmInstanceNumber": {
+                        "value": "6"
+                    },
+                    "vmImage": {
+                        "value": "[parameters('vmImage')]"
+                    },
+                    "vmRole": {
+                        "value": "App - Convergent Invoicing"
+                    },
+                    "vmAdminUserName": {
+                        "value": "[parameters('vmAdminUserName')]"
+                    },
+                    "vmAdminPassword": {
+                        "value": "[parameters('vmAdminPassword')]"
+                    },
+                    "nic1IpAddresses": {
+                        "value": "[parameters('App-ConvergentInvoicing-Nic-1')]"
+                    },
+                    "nic2IpAddresses": {
+                        "value": "[parameters('App-ConvergentInvoicing-Nic-2')]"
+                    },
+                    "tagServiceOwner": {
+                        "value": "[parameters('tagServiceOwner')]"
+                    },
+                    "tagServiceTicketRequestID": {
+                        "value": "[parameters('tagServiceTicketRequestID')]"
+                    },
+                    "tagSource": {
+                        "value": "[parameters('tagSource')]"
+                    },
+                    "tagProjectName": {
+                        "value": "[parameters('tagProjectName')]"
+                    },
+                    "tagCostCodeID": {
+                        "value": "[parameters('tagCostCodeID')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "[variables('azuredeploy.App.7.templatename')]",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('azuredeploy.templateuri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "debugSetting": {
+                    "detailLevel": "requestContent, responseContent"
+                },
+                "parameters": {
+                    "vmDeploymentNumber": {
+                        "value": "[parameters('vmDeploymentNumber')]"
+                    },
+                    "vmInstanceNumber": {
+                        "value": "7"
+                    },
+                    "vmImage": {
+                        "value": "[parameters('vmImage')]"
+                    },
+                    "vmRole": {
+                        "value": "App - SOM (CRM ABAP)"
+                    },
+                    "vmAdminUserName": {
+                        "value": "[parameters('vmAdminUserName')]"
+                    },
+                    "vmAdminPassword": {
+                        "value": "[parameters('vmAdminPassword')]"
+                    },
+                    "nic1IpAddresses": {
+                        "value": "[parameters('App-SOMCRMABAP-Nic-1')]"
+                    },
+                    "nic2IpAddresses": {
+                        "value": "[parameters('App-SOMCRMABAP-Nic-2')]"
+                    },
+                    "tagServiceOwner": {
+                        "value": "[parameters('tagServiceOwner')]"
+                    },
+                    "tagServiceTicketRequestID": {
+                        "value": "[parameters('tagServiceTicketRequestID')]"
+                    },
+                    "tagSource": {
+                        "value": "[parameters('tagSource')]"
+                    },
+                    "tagProjectName": {
+                        "value": "[parameters('tagProjectName')]"
+                    },
+                    "tagCostCodeID": {
+                        "value": "[parameters('tagCostCodeID')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "[variables('azuredeploy.App.8.templatename')]",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('azuredeploy.templateuri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "debugSetting": {
+                    "detailLevel": "requestContent, responseContent"
+                },
+                "parameters": {
+                    "vmDeploymentNumber": {
+                        "value": "[parameters('vmDeploymentNumber')]"
+                    },
+                    "vmInstanceNumber": {
+                        "value": "8"
+                    },
+                    "vmImage": {
+                        "value": "[parameters('vmImage')]"
+                    },
+                    "vmRole": {
+                        "value": "App - SOM (CRM JAVA)"
+                    },
+                    "vmAdminUserName": {
+                        "value": "[parameters('vmAdminUserName')]"
+                    },
+                    "vmAdminPassword": {
+                        "value": "[parameters('vmAdminPassword')]"
+                    },
+                    "nic1IpAddresses": {
+                        "value": "[parameters('App-SOMCRMJAVA-Nic-1')]"
+                    },
+                    "nic2IpAddresses": {
+                        "value": "[parameters('App-SOMCRMJAVA-Nic-2')]"
+                    },
+                    "tagServiceOwner": {
+                        "value": "[parameters('tagServiceOwner')]"
+                    },
+                    "tagServiceTicketRequestID": {
+                        "value": "[parameters('tagServiceTicketRequestID')]"
+                    },
+                    "tagSource": {
+                        "value": "[parameters('tagSource')]"
+                    },
+                    "tagProjectName": {
+                        "value": "[parameters('tagProjectName')]"
+                    },
+                    "tagCostCodeID": {
+                        "value": "[parameters('tagCostCodeID')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2017-05-10",
+            "name": "[variables('azuredeploy.Db.5.templatename')]",
+            "dependsOn": [],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('azuredeploy.templateuri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "debugSetting": {
+                    "detailLevel": "requestContent, responseContent"
+                },
+                "parameters": {
+                    "vmDeploymentNumber": {
+                        "value": "[parameters('vmDeploymentNumber')]"
+                    },
+                    "vmInstanceNumber": {
+                        "value": "5"
+                    },
+                    "vmImage": {
+                        "value": "[parameters('vmImage')]"
+                    },
+                    "vmRole": {
+                        "value": "DB - S/4HANA Hybris Billing"
+                    },
+                    "vmAdminUserName": {
+                        "value": "[parameters('vmAdminUserName')]"
+                    },
+                    "vmAdminPassword": {
+                        "value": "[parameters('vmAdminPassword')]"
+                    },
+                    "nic1IpAddresses": {
+                        "value": "[parameters('Db-Hybris-Nic-1')]"
+                    },
+                    "nic2IpAddresses": {
+                        "value": "[parameters('Db-Hybris-Nic-2')]"
+                    },
+                    "tagServiceOwner": {
+                        "value": "[parameters('tagServiceOwner')]"
+                    },
+                    "tagServiceTicketRequestID": {
+                        "value": "[parameters('tagServiceTicketRequestID')]"
+                    },
+                    "tagSource": {
+                        "value": "[parameters('tagSource')]"
+                    },
+                    "tagProjectName": {
+                        "value": "[parameters('tagProjectName')]"
+                    },
+                    "tagCostCodeID": {
+                        "value": "[parameters('tagCostCodeID')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}
