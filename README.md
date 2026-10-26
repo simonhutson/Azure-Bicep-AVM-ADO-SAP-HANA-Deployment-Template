@@ -1,5 +1,8 @@
 <h1>Azure SAP HANA Dev Test Deployment Templates</h1>
 <p>This template takes a minimum amount of parameters and deploys one or more VMs, customized for use with 2-tier SAP HANA, using a variety of custom and gallery operating system images. Each VM is configured with two NICs, each with multiple IP addresses.</p>
+<h2>Spec Kit definition</h2>
+<p>The <a href="specs/001-sap-hana-dev-test/spec.md">reverse-engineered feature specification</a> defines the legacy deployment's scope, operator scenarios, requirements, and acceptance criteria. The <a href="specs/001-sap-hana-dev-test/research.md">supporting analysis</a> records the template flow, role and landscape catalogues, external prerequisites, bootstrap behavior, and known defects. A <a href="specs/001-sap-hana-dev-test/checklists/requirements.md">requirements checklist</a> distinguishes completed static analysis from unperformed runtime acceptance.</p>
+<p>This is an as-is definition, not a deployment certification or modernization. The checked-in templates prepare infrastructure and attempt operating-system onboarding; they do not themselves install SAP/HANA. Known source-level blockers are documented, and the deployment templates and scripts are unchanged.</p>
 <p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fdesmcguire%2FAzure-SAP-HANA-Dev-Test-Deployment-Templates%2Fmaster%2Fazuredeploy.single.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png" />
 </a>
