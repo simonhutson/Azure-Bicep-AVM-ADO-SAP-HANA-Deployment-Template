@@ -1,8 +1,30 @@
 targetScope = 'resourceGroup'
 
-import { marketplacePlanType } from '../types.bicep'
+import { marketplacePlanType, roleType } from '../types.bicep'
 
-@description('Region of the existing VNet and the development VM.')
+@description('Development launch profile. Published portal templates fix this value to the selected button.')
+@allowed([
+  'single'
+  'full'
+  'netweaverGateway'
+  'gatewayFes'
+  'sapPo'
+  'sapBw'
+  'utilities'
+  'cloudConnector'
+  'hybrisBilling'
+])
+param landscape string = 'cloudConnector'
+
+@description('Application or database role, used only by the SINGLE development VM option.')
+param singleRole roleType = 'app-cloud-connector'
+
+@description('VM instance number, used only by the SINGLE development VM option.')
+@minValue(0)
+@maxValue(9)
+param singleInstanceNumber int = 0
+
+@description('Region of the existing VNet and all development VMs.')
 param location string = 'uksouth'
 
 @description('2-12 lowercase alphanumeric characters, beginning with a letter.')
@@ -47,11 +69,11 @@ param networkResourceGroupName string
 @minLength(1)
 param virtualNetworkName string
 
-@description('Existing subnet for the Cloud Connector primary NIC.')
+@description('Existing subnet shared by the primary NICs of all VMs in the selected development profile.')
 @minLength(1)
 param nic1SubnetName string
 
-@description('Existing subnet for the Cloud Connector secondary NIC.')
+@description('Existing subnet shared by the secondary NICs of all VMs in the selected development profile.')
 @minLength(1)
 param nic2SubnetName string
 
@@ -76,6 +98,15 @@ param costCodeId string
 param sapSupportReviewReference string
 
 var catalog = loadJsonContent('../catalog.json')
+var singleVirtualMachines = [
+  {
+    role: singleRole
+    instance: string(singleInstanceNumber)
+    nic1IpAddresses: ['', '', '', '']
+    nic2IpAddresses: ['', '', '', '']
+  }
+]
+var virtualMachines = landscape == 'single' ? singleVirtualMachines : catalog.landscapes[landscape]
 var subnetPair = {
   nic1: nic1SubnetName
   nic2: nic2SubnetName
@@ -87,7 +118,7 @@ module infrastructure '../main.bicep' = {
     location: location
     namePrefix: namePrefix
     deploymentNumber: padLeft(deploymentNumber, 2, '0')
-    virtualMachines: catalog.landscapes.cloudConnector
+    virtualMachines: virtualMachines
     image: {
       publisher: 'SUSE'
       offer: 'sles-sap-15-sp6-byos'

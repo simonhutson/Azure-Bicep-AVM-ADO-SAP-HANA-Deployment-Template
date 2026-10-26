@@ -3,62 +3,80 @@ BeforeDiscovery {
     $data = Get-Content -LiteralPath (Join-Path $root 'infra\catalog.json') -Raw | ConvertFrom-Json -AsHashtable
     $roles = @($data.roles.Keys | ForEach-Object { @{ Role = $_ } })
     $landscapes = @(
-        @{ Profile = 'netweaverGateway'; File = 'azuredeploy.netweavergateway.json' },
-        @{ Profile = 'gatewayFes'; File = 'azuredeploy.gatewayfes.json' },
-        @{ Profile = 'sapPo'; File = 'azuredeploy.sappo.json' },
-        @{ Profile = 'sapBw'; File = 'azuredeploy.sapbw.json' },
-        @{ Profile = 'utilities'; File = 'azuredeploy.s4hanautilities.json' },
-        @{ Profile = 'cloudConnector'; File = 'azuredeploy.cloudconnector.json' },
-        @{ Profile = 'hybrisBilling'; File = 'azuredeploy.s4hanahybrisbilling.json' },
-        @{ Profile = 'full'; File = 'azuredeploy.full.json' }
+        @{ Profile = 'netweaverGateway'; ExpectedRoles = @('app-nw-gateway', 'db-nw-gateway'); Instances = @('1', '0'); Nic1Counts = @(4, 2); Nic2Counts = @(3, 2) },
+        @{ Profile = 'gatewayFes'; ExpectedRoles = @('app-gateway-fes', 'db-gateway-fes'); Instances = @('2', '2'); Nic1Counts = @(4, 2); Nic2Counts = @(3, 2) },
+        @{ Profile = 'sapPo'; ExpectedRoles = @('app-po', 'db-po'); Instances = @('1', '1'); Nic1Counts = @(4, 2); Nic2Counts = @(3, 2) },
+        @{ Profile = 'sapBw'; ExpectedRoles = @('app-bw', 'db-bw'); Instances = @('3', '3'); Nic1Counts = @(4, 2); Nic2Counts = @(3, 2) },
+        @{ Profile = 'utilities'; ExpectedRoles = @('app-utilities', 'db-utilities'); Instances = @('4', '4'); Nic1Counts = @(4, 2); Nic2Counts = @(3, 2) },
+        @{ Profile = 'cloudConnector'; ExpectedRoles = @('app-cloud-connector'); Instances = @('9'); Nic1Counts = @(4); Nic2Counts = @(3) },
+        @{ Profile = 'hybrisBilling'; ExpectedRoles = @('app-cc', 'app-ci', 'app-som-abap', 'app-som-java', 'db-hybris'); Instances = @('5', '6', '7', '8', '5'); Nic1Counts = @(3, 3, 3, 3, 4); Nic2Counts = @(3, 3, 3, 3, 4) },
+        @{
+            Profile = 'full'
+            ExpectedRoles = @('app-nw-gateway', 'app-po', 'app-gateway-fes', 'app-bw', 'app-utilities', 'app-cc', 'app-ci', 'app-som-abap', 'app-som-java', 'app-cloud-connector', 'db-nw-gateway', 'db-po', 'db-gateway-fes', 'db-bw', 'db-utilities', 'db-hybris')
+            Instances = @('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '1', '2', '3', '4', '5')
+            Nic1Counts = (@(3) * 16)
+            Nic2Counts = (@(3) * 10 + @(4) * 6)
+        }
     )
 }
 
 BeforeAll {
     $script:Root = Split-Path $PSScriptRoot
-    $script:Archive = Join-Path $Root 'archive'
     $catalog = Get-Content -LiteralPath (Join-Path $Root 'infra\catalog.json') -Raw | ConvertFrom-Json -AsHashtable
-    $legacyDisks = Get-Content -LiteralPath (Join-Path $Archive 'settings.vm.storageprofile.datadisks.json') -Raw | ConvertFrom-Json -AsHashtable
-    $legacyTags = Get-Content -LiteralPath (Join-Path $Archive 'tags.json') -Raw | ConvertFrom-Json -AsHashtable
-    $core = Get-Content -LiteralPath (Join-Path $Archive 'azuredeploy.json') -Raw | ConvertFrom-Json -AsHashtable
     $template = Get-Content -LiteralPath (Join-Path $Root '.build\iac\main.json') -Raw | ConvertFrom-Json -AsHashtable
+    $databaseDisks = @{
+        'db-nw-gateway' = @(32, 32, 64, 128, 64, 32)
+        'db-po' = @(32, 32, 64, 128, 64, 31)
+        'db-gateway-fes' = @(32, 32, 64, 128, 64, 32)
+        'db-bw' = @(32, 32, 128, 512, 128, 64)
+        'db-utilities' = @(32, 32, 128, 512, 128, 64)
+        'db-hybris' = @(32, 32, 128, 256, 128, 64, 128, 256, 128, 64, 128, 256, 128, 64)
+    }
+    $imos = "IMOS $([char]0x2013) EUR"
+    $serviceNames = @{
+        'nw-gateway' = $imos
+        'po' = $imos
+        'gateway-fes' = 'SAP NETWEAVER GATEWAY - EUR'
+        'bw' = 'SAP BUSINESS WAREHOUSE - EUR'
+        'utilities' = 'UTILITIES - EUR'
+        'cc' = 'SAP HYBRIS BILLING - EUR'
+        'ci' = 'SAP HYBRIS BILLING - EUR'
+        'som-abap' = 'SAP HYBRIS BILLING - EUR'
+        'som-java' = 'SAP HYBRIS BILLING - EUR'
+        'cloud-connector' = 'SAP CLOUD CONNECTOR'
+        'hybris' = 'SAP HYBRIS BILLING - EUR'
+    }
 }
 
-Describe 'Source-grounded role catalogue' {
-    It 'keeps the complete original deployment bundle in archive rather than the repository root' {
-        @(Get-ChildItem -LiteralPath $Archive -File -Filter '*.json').Count | Should -Be 47
-        @(Get-ChildItem -LiteralPath (Join-Path $Archive 'scripts') -File -Filter '*.sh').Count | Should -Be 6
-        Test-Path -LiteralPath (Join-Path $Archive 'SAP HANA Dev Test.png') | Should -BeTrue
-        foreach ($file in Get-ChildItem -LiteralPath $Archive -File -Filter '*.json') {
-            Test-Path -LiteralPath (Join-Path $Root $file.Name) | Should -BeFalse
-        }
-        Test-Path -LiteralPath (Join-Path $Root 'scripts') | Should -BeFalse
-    }
-    It 'covers all sixteen original roles without aliases or omissions' {
+Describe 'Bicep role and landscape catalogue' {
+    It 'covers every typed Bicep role without aliases or omissions' {
+        $roleDefinitions = @($template.definitions.GetEnumerator() | Where-Object Key -Match '(^|\.)roleType$')
+        $roleDefinitions.Count | Should -Be 1
         $catalog.roles.Count | Should -Be 16
-        @($catalog.roles.Values.legacyRole | Sort-Object) -join '|' | Should -Be (@($core.parameters.vmRole.allowedValues | Sort-Object) -join '|')
+        @($catalog.roles.Keys | Sort-Object) -join '|' | Should -Be (@($roleDefinitions[0].Value.allowedValues | Sort-Object) -join '|')
     }
-    It 'preserves ordered disks and service tags for <Role>' -ForEach $roles {
+    It 'uses the expected ordered disks and service classification for <Role>' -ForEach $roles {
         $profile = $catalog.roles[$Role]
-        ($profile.dataDiskSizesGB -join ',') | Should -Be ($legacyDisks.variables.diskSizes.'SAP Dev Test'[$profile.legacyRole].disks.diskSizeGB -join ',')
-        $profile.serviceName | Should -Be $legacyTags.variables.tagServiceNames[$profile.legacyRole].tagServiceName
+        $expectedCategory = if ($Role.StartsWith('app-')) { 'sap' } else { 'han' }
+        $expectedDisks = if ($expectedCategory -eq 'sap') { @(32, 32, 64) } else { $databaseDisks[$Role] }
+        $profile.category | Should -Be $expectedCategory
+        ($profile.dataDiskSizesGB -join ',') | Should -Be ($expectedDisks -join ',')
+        $profile.serviceName | Should -Be $serviceNames[($Role -replace '^(app|db)-', '')]
+        @('gateway', 'po', 'bw', 'utilities', 'hybris', 'cloudConnector') | Should -Contain $profile.network
     }
-    It 'preserves topology, instance numbers and NIC cardinalities for <Profile>' -ForEach $landscapes {
-        $old = Get-Content -LiteralPath (Join-Path $Archive $File) -Raw | ConvertFrom-Json -AsHashtable
+    It 'defines the expected roles, instances and NIC cardinalities for <Profile>' -ForEach $landscapes {
         $new = $catalog.landscapes[$Profile]
-        $new.Count | Should -Be $old.resources.Count
+        $new.Count | Should -Be $ExpectedRoles.Count
         for ($i = 0; $i -lt $new.Count; $i++) {
-            $p = $old.resources[$i].properties.parameters
-            $role = $p.vmRole.value
-            if ($role -in 'App - NetWeaver Gateway', 'DB - NetWeaver Gateway') { $role += ' (IMOS)' }
-            $catalog.roles[$new[$i].role].legacyRole | Should -Be $role
-            $new[$i].instance | Should -Be $p.vmInstanceNumber.value
-            foreach ($nic in 1, 2) {
-                $p["nic${nic}IpAddresses"].value | Should -Match "parameters\('([^']+)'\)"
-                $parameterName = [regex]::Match($p["nic${nic}IpAddresses"].value, "parameters\('([^']+)'\)").Groups[1].Value
-                $new[$i]["nic${nic}IpAddresses"].Count | Should -Be $old.parameters[$parameterName].defaultValue.Count
-            }
+            $new[$i].role | Should -Be $ExpectedRoles[$i]
+            $new[$i].instance | Should -Be $Instances[$i]
+            $new[$i].nic1IpAddresses.Count | Should -Be $Nic1Counts[$i]
+            $new[$i].nic2IpAddresses.Count | Should -Be $Nic2Counts[$i]
+            @($new[$i].nic1IpAddresses + $new[$i].nic2IpAddresses | Where-Object { $_ -ne '' }).Count | Should -Be 0
         }
+    }
+    It 'gives every role a distinct availability-set naming identity' {
+        @($catalog.roles.Values | ForEach-Object { "$($_.category)/$($_.availabilitySuffix)" } | Sort-Object -Unique).Count | Should -Be 16
     }
     It 'retains FULL as 16 VMs, 32 NICs and 74 data disks without provisioning SAP' {
         $catalog.landscapes.full.Count | Should -Be 16
@@ -122,7 +140,7 @@ Describe 'Compiled AVM deployment baseline' {
         $vmCode | Should -Match "deleteOption: 'Detach'"
         $vmCode | Should -Match "storageAccountType: 'Premium_LRS'"
         $vmCode | Should -Match 'sha256sum --check --status && /bin/bash'
-        $vmCode | Should -Not -Match 'sles-bootstrap-|puppetPreshared|scriptStorageAccountKey'
+        $vmCode | Should -Not -Match 'puppetPreshared|scriptStorageAccountKey'
     }
     It 'pins both AVMs to the versions whose contracts were verified' {
         $code = Get-Content -LiteralPath (Join-Path $Root 'infra\main.bicep') -Raw

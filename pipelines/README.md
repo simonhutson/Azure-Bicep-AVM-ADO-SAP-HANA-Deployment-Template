@@ -62,8 +62,8 @@ Build (no Azure identity)
 
 - Restores pinned Bicep, Pester and YAML-parser versions from [tools.psd1](tools.psd1) when missing.
 - Builds/lints the shared Bicep entry point and development portal wrapper, and compiles all three environment parameter files.
-- Runs [the test suite](../tests/), including published portal-template freshness and development-default parity, and publishes test results.
-- Publishes the `iac` artifact containing the shared and portal templates, compiled parameters, catalogue and a SHA-256/source-commit manifest. Maintainers refresh the committed portal JSON with `Build-IaC.ps1 -UpdatePortalTemplate`; portal users do not need to run a pipeline.
+- Runs [the test suite](../tests/), including all nine published portal profiles, their README labels/topologies and generated-template freshness, and publishes test results.
+- Publishes the `iac` artifact containing the shared and generic portal templates, compiled parameters, catalogue and a SHA-256/source-commit manifest. Maintainers generate the nine fixed-profile portal JSON files with `Build-IaC.ps1 -UpdatePortalTemplate`; portal users do not need to run a pipeline.
 
 ### Plan
 
@@ -97,7 +97,7 @@ The lock serializes cooperating deployments, not every external Azure writer. Th
 - Rotate SSH keys through a separate operational process; changing the initial administrator key on an existing VM may require an explicit access-extension workflow.
 - A failed deployment can leave successful sibling resources behind. Inspect its operations and resolve the cause before retrying.
 - Removing a role from the desired VM list does not delete it. Decommission resources through a separately approved cleanup/data-retention workflow.
-- Never run the archived destructive disk scripts as an automatic "repair" step.
+- Never format or reinitialize attached disks as an automatic "repair" step.
 - Promote tested commits through environments using reviewed configuration. Do not treat these independent samples as already sized for production.
 - Production HANA VM certification is workload-specific and does not approve the retained all-Premium-SSD-v1 disk layout. Resolve the HANA log/data storage restrictions and guest configuration described in the [VM selection guide](../infra/README.md#sap-support-and-vm-selection) before installing a production workload.
 - Pipeline YAML was parsed and behavior-tested locally. Azure DevOps authorization, full template expansion, Azure provider validation and an actual run require your organization and configured resources.

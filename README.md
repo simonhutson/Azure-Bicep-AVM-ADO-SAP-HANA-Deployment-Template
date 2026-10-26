@@ -1,192 +1,158 @@
 <h1>Azure SAP Infrastructure</h1>
 <h2>Bicep, Azure Verified Modules and Azure DevOps</h2>
-<p>The <a href="infra/main.bicep">Bicep entry point</a> replaces property-by-property linked deployments with resource-sized Azure Verified Modules and a shared role catalogue. Separate <a href="infra/environments">environment parameter files</a> configure development, test and production. The <a href="azure-pipelines.yml">CI pipeline</a> builds and tests without Azure credentials; the <a href="pipelines/deploy.yml">deployment pipeline</a> validates, previews and applies the selected environment using federated service connections and protected-environment checks.</p>
-<p>Start with the <a href="infra/README.md">migration and configuration guide</a> and <a href="pipelines/README.md">Azure DevOps setup guide</a>. Replace all <code>REQUIRED_</code> placeholders before deployment. The new baseline uses SLES for SAP 15, SSH-only administration and managed boot diagnostics. Legacy guest scripts are disabled; production sizing, HA, guest configuration and SAP/HANA readiness require separate review.</p>
+<p>The <a href="infra/main.bicep">Bicep entry point</a> composes resource-sized Azure Verified Modules and a shared role catalogue. Separate <a href="infra/environments">environment parameter files</a> configure development, test and production. The <a href="azure-pipelines.yml">CI pipeline</a> builds and tests without Azure credentials; the <a href="pipelines/deploy.yml">deployment pipeline</a> validates, previews and applies the selected environment using federated service connections and protected-environment checks. The portal options below deploy development environments independently of Azure DevOps.</p>
+<p>Start with the <a href="infra/README.md">configuration guide</a> and <a href="pipelines/README.md">Azure DevOps setup guide</a>. Replace all <code>REQUIRED_</code> placeholders before using pipeline parameter examples. The baseline uses SLES for SAP 15, SSH-only administration and managed boot diagnostics. Guest bootstrap is disabled by default; production sizing, HA, guest configuration and SAP/HANA readiness require separate review.</p>
 <p>The <a href="infra/README.md#sap-support-and-vm-selection">SAP VM selection policy</a> distinguishes application/nonproduction candidates from exact-workload-certified production HANA SKUs, including an OLAP-specific BW choice. SAP Note 1928533 requires authorized login and was not accessed; a recorded operator support review is required before deployment. Certified VM selection does not certify the retained storage layout or the complete SAP system.</p>
 <h2>Deploy development with Bicep/AVM (Azure portal)</h2>
-<p>Deploy the current Bicep/AVM development preset directly from Azure portal, without Azure DevOps pipelines, service connections or approvals. This is the modern implementation, not the archive: one Cloud Connector application VM using <code>Standard_E4ds_v5</code>, SLES for SAP 15 SP6 BYOS Gen2, SSH-only administration, managed boot diagnostics and two private NICs. It does not deploy a HANA database or install SAP software.</p>
-<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsimonhutson%2FAzure-Bicep-AVM-ADO-SAP-HANA-Deployment-Template%2Fmain%2Finfra%2Fportal%2Fdevelopment.json" target="_blank">
-    <img src="https://aka.ms/deploytoazurebutton" alt="Deploy Bicep/AVM development to Azure" />
-</a>
-Deploy development (Bicep/AVM)</p>
-<ol>
-    <li>Choose a dedicated development resource group and a region matching an existing VNet in the same subscription. Supply its resource group, VNet name and the subnet names for NIC 1 and NIC 2. Networking is not created; all private IP configurations use dynamic allocation. Access requires existing private connectivity, such as VPN, ExpressRoute or Bastion; no public IP is created.</li>
-    <li>Supply an OpenSSH public key and a non-root administrator username. Select an available version of <code>SUSE:sles-sap-15-sp6-byos:gen2</code> and enter its numeric major, minor and build components. The template constructs an exact version; it cannot request <code>latest</code>. If the image metadata specifies a purchase plan, fill the optional <code>marketplacePlan</code> object with its <code>name</code>, <code>product</code> and <code>publisher</code>, and accept the marketplace terms separately. Confirm host-encryption support before deployment.</li>
-    <li>Supply ownership, cost-code and change-request details, plus a non-secret reference to the authorized SAP support review. Use a unique deployment number from 0 to 99; resource names render it as two digits.</li>
-    <li>Review portal validation, permissions, quota and costs before selecting <strong>Create</strong>. The preset, VM/disk sizes, host encryption and disabled bootstrap are fixed by the portal entry point; it does not expose production or arbitrary SKU overrides.</li>
-</ol>
-<p><strong>Manual deployment boundary:</strong> This development-only route does not run the pipeline's PowerShell preflight, Azure capability checks, what-if comparison or approval gates. The operator must verify the <a href="infra/README.md#sap-support-and-vm-selection">SAP support policy</a>, pinned image availability, network capacity and applicable Azure policies. ARM validation and a successful VM deployment are not evidence of SAP/HANA readiness.</p>
-<p>The button loads the published <a href="infra/portal/development.json">compiled ARM JSON</a>, generated from <a href="infra/portal/development.bicep">the development portal entry point</a> and <a href="infra/main.bicep">the shared Bicep implementation</a>. Azure portal does not deploy a remote Bicep file or automatically read a Bicep parameter file. Publish these files to <code>main</code> before using the button; for a fork or another branch, update the button URL. No credentials are embedded in the published template.</p>
-<p>Maintainers: regenerate the published template with <code>.\pipelines\scripts\Build-IaC.ps1 -UpdatePortalTemplate</code> using the <a href="pipelines/tools.psd1">pinned Bicep compiler</a>, and commit the generated JSON with its source changes. CI recompiles it and tests for drift from the published JSON and the <a href="infra/environments/development.bicepparam">development defaults</a>.</p>
-<h2>Historical manual ARM deployment</h2>
-<p>The original ARM templates, parameter examples and bootstrap scripts are preserved unchanged in <a href="archive/">archive/</a>. Their relative template layout is retained for historical reference and catalogue-parity testing.</p>
-<p>This template takes a minimum amount of parameters and deploys one or more VMs, customized for use with 2-tier SAP HANA, using a variety of custom and gallery operating system images. Each VM is configured with two NICs, each with multiple IP addresses.</p>
-<h2>Spec Kit definition</h2>
-<p>The <a href="specs/001-sap-hana-dev-test/spec.md">reverse-engineered feature specification</a> defines the legacy deployment's scope, operator scenarios, requirements, and acceptance criteria. The <a href="specs/001-sap-hana-dev-test/research.md">supporting analysis</a> records the template flow, role and landscape catalogues, external prerequisites, bootstrap behavior, and known defects. A <a href="specs/001-sap-hana-dev-test/checklists/requirements.md">requirements checklist</a> distinguishes completed static analysis from unperformed runtime acceptance.</p>
-<p>This is an as-is definition, not a deployment certification or modernization. The checked-in templates prepare infrastructure and attempt operating-system onboarding; they do not themselves install SAP/HANA. Known source-level blockers are documented, and the deployment templates and scripts are unchanged.</p>
-<h2>Archived ARM development deployment (Azure portal)</h2>
-<p>Use these entry points for the separate, archived ARM development workflow. The buttons load templates from this repository's <code>main/archive/</code> directory directly into Azure portal; they do not queue Azure DevOps pipelines or require pipeline service connections or approvals. They do not use the Bicep environment files, current VM catalogue or pipeline validation checks.</p>
-<ol>
-    <li>Review the <a href="specs/001-sap-hana-dev-test/research.md#external-prerequisites">archived external prerequisites</a> and known defects before deploying. The unchanged validator accepts only the subscription display name <code>SAP Dev Test</code> and resource-group location <code>uksouth</code>. Existing networks, Key Vault secrets, script storage, diagnostic storage and guest-service endpoints must be available.</li>
-    <li>Select a button, sign in to Azure and choose a dedicated development resource group. Supply the deployment number, instance/role for a single VM, image, administrator credentials, NIC address arrays and ownership tags. Blank NIC address entries request dynamic allocation.</li>
-    <li>Review portal validation, quota and costs before selecting <strong>Create</strong>. This workflow provisions infrastructure and attempts legacy guest bootstrap; it does not install SAP/HANA and is not a production deployment path.</li>
-</ol>
-<p><strong>Legacy limitations:</strong> The archive still uses SLES for SAP 12 images, password administration and known role/bootstrap defects documented in the <a href="specs/001-sap-hana-dev-test/research.md">source analysis</a>. Updating these links does not resolve those defects or verify that the old images and external services remain available. For another subscription or region, adapt and publish a separate copy of the complete archived bundle first.</p>
-<p>Azure must be able to retrieve the entry template and its sibling linked templates over HTTPS. Keep the archived directory layout intact; if using a fork or another branch, update the repository and branch in the button URLs. These buttons load the published branch, not files from a local checkout.</p>
-<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsimonhutson%2FAzure-Bicep-AVM-ADO-SAP-HANA-Deployment-Template%2Fmain%2Farchive%2Fazuredeploy.single.json" target="_blank">
+<p>Choose one of nine development profiles built from the current Bicep/AVM implementation. No Azure DevOps pipeline, service connection or approval is required. Every option uses SLES for SAP 15 SP6 BYOS Gen2, SSH-only administration, managed boot diagnostics, host encryption and two private NICs per VM. These templates provision infrastructure, not SAP/HANA software.</p>
+<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsimonhutson%2FAzure-Bicep-AVM-ADO-SAP-HANA-Deployment-Template%2Fmain%2Finfra%2Fportal%2Fsingle.json" target="_blank">
     <img src="https://aka.ms/deploytoazurebutton" alt="Deploy to Azure" />
 </a>
 Deploy a SINGLE development VM (one selected application or database role)</p>
-<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsimonhutson%2FAzure-Bicep-AVM-ADO-SAP-HANA-Deployment-Template%2Fmain%2Farchive%2Fazuredeploy.full.json" target="_blank">
+<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsimonhutson%2FAzure-Bicep-AVM-ADO-SAP-HANA-Deployment-Template%2Fmain%2Finfra%2Fportal%2Ffull.json" target="_blank">
     <img src="https://aka.ms/deploytoazurebutton" alt="Deploy to Azure" />
 </a>
 Deploy the FULL development landscape (10xApp, 6xDB; 16 VMs)</p>
-<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsimonhutson%2FAzure-Bicep-AVM-ADO-SAP-HANA-Deployment-Template%2Fmain%2Farchive%2Fazuredeploy.netweavergateway.json" target="_blank">
+<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsimonhutson%2FAzure-Bicep-AVM-ADO-SAP-HANA-Deployment-Template%2Fmain%2Finfra%2Fportal%2Fnetweaver-gateway.json" target="_blank">
     <img src="https://aka.ms/deploytoazurebutton" alt="Deploy to Azure" />
 </a>
 Deploy a NetWeaver Gateway Environment (1xApp, 1xDB)</p>
-<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsimonhutson%2FAzure-Bicep-AVM-ADO-SAP-HANA-Deployment-Template%2Fmain%2Farchive%2Fazuredeploy.gatewayfes.json" target="_blank">
+<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsimonhutson%2FAzure-Bicep-AVM-ADO-SAP-HANA-Deployment-Template%2Fmain%2Finfra%2Fportal%2Fgateway-fes.json" target="_blank">
     <img src="https://aka.ms/deploytoazurebutton" alt="Deploy to Azure" />
 </a>
 Deploy a Gateway FES Environment (1xApp, 1xDB)</p>
-<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsimonhutson%2FAzure-Bicep-AVM-ADO-SAP-HANA-Deployment-Template%2Fmain%2Farchive%2Fazuredeploy.sappo.json" target="_blank">
+<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsimonhutson%2FAzure-Bicep-AVM-ADO-SAP-HANA-Deployment-Template%2Fmain%2Finfra%2Fportal%2Fsap-po.json" target="_blank">
     <img src="https://aka.ms/deploytoazurebutton" alt="Deploy to Azure" />
 </a>
 Deploy a SAP PO Environment (1xApp, 1xDB)</p>
-<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsimonhutson%2FAzure-Bicep-AVM-ADO-SAP-HANA-Deployment-Template%2Fmain%2Farchive%2Fazuredeploy.sapbw.json" target="_blank">
+<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsimonhutson%2FAzure-Bicep-AVM-ADO-SAP-HANA-Deployment-Template%2Fmain%2Finfra%2Fportal%2Fsap-bw.json" target="_blank">
     <img src="https://aka.ms/deploytoazurebutton" alt="Deploy to Azure" />
 </a>
 Deploy a SAP BW Environment (1xApp, 1xDB)</p>
-<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsimonhutson%2FAzure-Bicep-AVM-ADO-SAP-HANA-Deployment-Template%2Fmain%2Farchive%2Fazuredeploy.s4hanautilities.json" target="_blank">
+<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsimonhutson%2FAzure-Bicep-AVM-ADO-SAP-HANA-Deployment-Template%2Fmain%2Finfra%2Fportal%2Fs4hana-utilities.json" target="_blank">
     <img src="https://aka.ms/deploytoazurebutton" alt="Deploy to Azure" />
 </a>
 Deploy a S/4HANA Utilities Environment (1xApp, 1xDB)</p>
-<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsimonhutson%2FAzure-Bicep-AVM-ADO-SAP-HANA-Deployment-Template%2Fmain%2Farchive%2Fazuredeploy.cloudconnector.json" target="_blank">
+<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsimonhutson%2FAzure-Bicep-AVM-ADO-SAP-HANA-Deployment-Template%2Fmain%2Finfra%2Fportal%2Fdevelopment.json" target="_blank">
     <img src="https://aka.ms/deploytoazurebutton" alt="Deploy to Azure" />
 </a>
 Deploy a Cloud Connector Environment (1xApp)</p>
-<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsimonhutson%2FAzure-Bicep-AVM-ADO-SAP-HANA-Deployment-Template%2Fmain%2Farchive%2Fazuredeploy.s4hanahybrisbilling.json" target="_blank">
+<p><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsimonhutson%2FAzure-Bicep-AVM-ADO-SAP-HANA-Deployment-Template%2Fmain%2Finfra%2Fportal%2Fs4hana-hybris-billing.json" target="_blank">
     <img src="https://aka.ms/deploytoazurebutton" alt="Deploy to Azure" />
 </a>
 Deploy a S/4HANA Hybris Billing Environment (4xApp, 1xDB)</p>
+<h3>Portal inputs and prerequisites</h3>
+<ol>
+    <li>Choose a dedicated development resource group and a region matching an existing VNet in the same subscription. Supply its resource group, VNet name and two subnet names. All selected VMs share this pair: NIC 1 uses the first subnet and NIC 2 uses the second. IP configurations use dynamic allocation. No networking or public IP is created; use existing private connectivity such as VPN, ExpressRoute or Bastion.</li>
+    <li>For SINGLE, select <code>singleRole</code> from the sixteen application/database roles and <code>singleInstanceNumber</code> from 0 to 9. It creates one VM with four dynamic IPv4 configurations per NIC. The other buttons use the catalogue's roles, instance numbers and NIC address counts; the single-VM fields are ignored.</li>
+    <li>Supply an OpenSSH public key and a non-root administrator username. Select an available <code>SUSE:sles-sap-15-sp6-byos:gen2</code> image and enter its numeric major, minor and build version components; <code>latest</code> is not accepted. If image metadata requires a purchase plan, fill the optional <code>marketplacePlan</code> object with its <code>name</code>, <code>product</code> and <code>publisher</code>, and accept marketplace terms separately.</li>
+    <li>Supply ownership, cost-code and change-request details plus a non-secret SAP support review reference. Choose a unique deployment number from 0 to 99, rendered as two digits in resource names. Confirm host-encryption support, permissions, subnet capacity and VM/disk quota for the entire selected profile. FULL creates 16 VMs, 32 NICs and 74 data disks.</li>
+    <li>Review portal validation and costs before selecting <strong>Create</strong>. Each button fixes its development profile, uses development/test VM sizes and disables bootstrap. Production, arbitrary SKU overrides and custom disk overrides are not exposed.</li>
+</ol>
+<p><strong>Manual deployment boundary:</strong> Portal deployments do not run the pipeline's PowerShell preflight, Azure capability checks, what-if comparison or approval gates. Verify the <a href="infra/README.md#sap-support-and-vm-selection">SAP support policy</a>, pinned image availability, network capacity and applicable Azure policies yourself. ARM validation and a successful VM deployment do not establish SAP/HANA readiness.</p>
+<p>Each button loads a self-contained <a href="infra/portal/">generated ARM JSON template</a> produced from <a href="infra/portal/development.bicep">the shared portal entry point</a> and <a href="infra/main.bicep">the shared Bicep implementation</a>. Azure portal does not deploy remote Bicep files or automatically read Bicep parameter files. Publish the JSON files to <code>main</code> before using the buttons; for a fork or another branch, update their URLs. No credentials are embedded in these templates.</p>
+<p>Maintainers: run <code>.\pipelines\scripts\Build-IaC.ps1 -UpdatePortalTemplate</code> with the <a href="pipelines/tools.psd1">pinned Bicep compiler</a> and commit all generated JSON with its source changes. Generation changes only the launch-profile default, allowed value and generation metadata. CI checks all nine files against the current build and verifies their topology and README labels.</p>
 <h2>VM sizes and data disks</h2>
-<p>The archived ARM portal defaults come from the <a href="archive/settings.vm.hardwareprofile.json">archived hardware profiles</a>; current Bicep defaults come from <a href="infra/catalog.json">the role catalogue</a>. The modern portal button uses the Bicep dev/test Cloud Connector application row; archived buttons do not inherit Bicep sizes. Each VM-size cell includes RAM in GiB. Data disks are requested capacities in LUN order, shared by both sets of role profiles, not a production storage recommendation. See the <a href="infra/README.md#sap-support-and-vm-selection">SAP support policy</a> before using or overriding any size.</p>
+<p>Defaults come from <a href="infra/catalog.json">the Bicep role catalogue</a>. All portal options use the development/test column; production defaults apply only to separately configured production deployments. Each VM-size cell includes RAM in GiB. Data disks are requested capacities in LUN order, not a production storage recommendation. See the <a href="infra/README.md#sap-support-and-vm-selection">SAP support policy</a> before using or overriding any size.</p>
 <table>
 	<tr>
 		<th>VM Role</th>
-		<th>Archived ARM dev size / RAM</th>
 		<th>Bicep dev/test size / RAM</th>
 		<th>Bicep production size / RAM</th>
 		<th>Data disks (GiB, LUN order)</th>
 	</tr>
 	<tr>
 		<td>App - NetWeaver Gateway (IMOS)</td>
-		<td>Standard_E4s_v3 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>32, 32, 64</td>
 	</tr>
 	<tr>
 		<td>App - SAP PO (IMOS)</td>
-		<td>Standard_E4s_v3 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>32, 32, 64</td>
 	</tr>
 	<tr>
 		<td>App - NetWeaver Gateway FES</td>
-		<td>Standard_E4s_v3 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>32, 32, 64</td>
 	</tr>
 	<tr>
 		<td>App - SAP BW</td>
-		<td>Standard_E4s_v3 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>32, 32, 64</td>
 	</tr>
 	<tr>
 		<td>App - S/4HANA Utilities</td>
-		<td>Standard_E4s_v3 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>32, 32, 64</td>
 	</tr>
 	<tr>
 		<td>App - Convergent Charging</td>
-		<td>Standard_E4s_v3 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>32, 32, 64</td>
 	</tr>
 	<tr>
 		<td>App - Convergent Invoicing</td>
-		<td>Standard_E4s_v3 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>32, 32, 64</td>
 	</tr>
 	<tr>
 		<td>App - SOM (CRM ABAP)</td>
-		<td>Standard_E4s_v3 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>32, 32, 64</td>
 	</tr>
 	<tr>
 		<td>App - SOM (CRM JAVA)</td>
-		<td>Standard_E4s_v3 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>32, 32, 64</td>
 	</tr>
 	<tr>
 		<td>App - Cloud Connector</td>
-		<td>Standard_E4s_v3 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>Standard_E4ds_v5 / 32</td>
 		<td>32, 32, 64</td>
 	</tr>
 	<tr>
 		<td>DB - NetWeaver Gateway (IMOS)</td>
-		<td>Standard_E8s_v3 / 64</td>
 		<td>Standard_E8ds_v5 / 64</td>
 		<td>Standard_E20ds_v5 / 160</td>
 		<td>32, 32, 64, 128, 64, 32</td>
 	</tr>
 	<tr>
 		<td>DB - SAP PO (IMOS)</td>
-		<td>Standard_E8s_v3 / 64</td>
 		<td>Standard_E8ds_v5 / 64</td>
 		<td>Standard_E20ds_v5 / 160</td>
 		<td>32, 32, 64, 128, 64, 31</td>
 	</tr>
 	<tr>
 		<td>DB - NetWeaver Gateway FES</td>
-		<td>Standard_E8s_v3 / 64</td>
 		<td>Standard_E8ds_v5 / 64</td>
 		<td>Standard_E20ds_v5 / 160</td>
 		<td>32, 32, 64, 128, 64, 32</td>
 	</tr>
 	<tr>
 		<td>DB - SAP BW</td>
-		<td>Standard_E16s_v3 / 128</td>
 		<td>Standard_E16ds_v5 / 128</td>
 		<td>Standard_M32ls / 256</td>
 		<td>32, 32, 128, 512, 128, 64</td>
 	</tr>
 	<tr>
 		<td>DB - S/4HANA Utilities</td>
-		<td>Standard_E32s_v3 / 256</td>
 		<td>Standard_E32ds_v5 / 256</td>
 		<td>Standard_E32ds_v5 / 256</td>
 		<td>32, 32, 128, 512, 128, 64</td>
 	</tr>
 	<tr>
 		<td>DB - S/4HANA Hybris Billing</td>
-		<td>Standard_E32s_v3 / 256</td>
 		<td>Standard_E32ds_v5 / 256</td>
 		<td>Standard_E32ds_v5 / 256</td>
 		<td>32, 32, 128, 256, 128, 64,<br>128, 256, 128, 64,<br>128, 256, 128, 64</td>

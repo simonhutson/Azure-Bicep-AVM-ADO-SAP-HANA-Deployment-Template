@@ -37,9 +37,11 @@ Describe 'Azure DevOps YAML contracts' {
         $environment.stages[0].dependsOn | Should -Be 'Build'
         $environment.stages[1].dependsOn | Should -Be 'Plan'
     }
-    It 'runs catalogue parity checks when the archived ARM baseline changes' {
-        $ci.trigger.paths.include | Should -Contain 'archive/**'
-        $ci.pr.paths.include | Should -Contain 'archive/**'
+    It 'validates Bicep, portal artifacts and README options on source and pull-request changes' {
+        foreach ($path in 'infra/*', 'pipelines/*', 'tests/*', 'azure-pipelines.yml', 'README.md') {
+            $ci.trigger.paths.include | Should -Contain $path
+            $ci.pr.paths.include | Should -Contain $path
+        }
     }
     It 'uses protected environments, sequential locks and current-run compiled artifacts' {
         $deploy = $environment.stages[1]

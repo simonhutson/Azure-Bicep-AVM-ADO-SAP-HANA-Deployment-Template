@@ -11,7 +11,7 @@ trigger:
       - pipelines/*
       - tests/*
       - azure-pipelines.yml
-      - archive/**
+      - README.md
 
 pr:
   branches:
@@ -23,7 +23,7 @@ pr:
       - pipelines/*
       - tests/*
       - azure-pipelines.yml
-      - archive/**
+      - README.md
 
 pool:
   vmImage: ubuntu-24.04

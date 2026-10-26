@@ -5,9 +5,9 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.44.1.10279",
-      "templateHash": "10719741125222042489"
-    }
+      "version": "0.44.1.10279"
+    },
+    "portalProfile": "cloudConnector"
   },
   "definitions": {
     "marketplacePlanType": {
@@ -29,14 +29,66 @@
           "sourceTemplate": "../types.bicep"
         }
       }
+    },
+    "roleType": {
+      "type": "string",
+      "allowedValues": [
+        "app-bw",
+        "app-cc",
+        "app-ci",
+        "app-cloud-connector",
+        "app-gateway-fes",
+        "app-nw-gateway",
+        "app-po",
+        "app-som-abap",
+        "app-som-java",
+        "app-utilities",
+        "db-bw",
+        "db-gateway-fes",
+        "db-hybris",
+        "db-nw-gateway",
+        "db-po",
+        "db-utilities"
+      ],
+      "metadata": {
+        "__bicep_imported_from!": {
+          "sourceTemplate": "../types.bicep"
+        }
+      }
     }
   },
   "parameters": {
+    "landscape": {
+      "type": "string",
+      "defaultValue": "cloudConnector",
+      "allowedValues": [
+        "cloudConnector"
+      ],
+      "metadata": {
+        "description": "Development launch profile. Published portal templates fix this value to the selected button."
+      }
+    },
+    "singleRole": {
+      "$ref": "#/definitions/roleType",
+      "defaultValue": "app-cloud-connector",
+      "metadata": {
+        "description": "Application or database role, used only by the SINGLE development VM option."
+      }
+    },
+    "singleInstanceNumber": {
+      "type": "int",
+      "defaultValue": 0,
+      "minValue": 0,
+      "maxValue": 9,
+      "metadata": {
+        "description": "VM instance number, used only by the SINGLE development VM option."
+      }
+    },
     "location": {
       "type": "string",
       "defaultValue": "uksouth",
       "metadata": {
-        "description": "Region of the existing VNet and the development VM."
+        "description": "Region of the existing VNet and all development VMs."
       }
     },
     "namePrefix": {
@@ -121,14 +173,14 @@
       "type": "string",
       "minLength": 1,
       "metadata": {
-        "description": "Existing subnet for the Cloud Connector primary NIC."
+        "description": "Existing subnet shared by the primary NICs of all VMs in the selected development profile."
       }
     },
     "nic2SubnetName": {
       "type": "string",
       "minLength": 1,
       "metadata": {
-        "description": "Existing subnet for the Cloud Connector secondary NIC."
+        "description": "Existing subnet shared by the secondary NICs of all VMs in the selected development profile."
       }
     },
     "serviceOwner": {
@@ -203,7 +255,6 @@
       },
       "roles": {
         "app-nw-gateway": {
-          "legacyRole": "App - NetWeaver Gateway (IMOS)",
           "category": "sap",
           "vmSize": "Standard_E4ds_v5",
           "dataDiskSizesGB": [
@@ -216,7 +267,6 @@
           "serviceName": "IMOS – EUR"
         },
         "app-po": {
-          "legacyRole": "App - SAP PO (IMOS)",
           "category": "sap",
           "vmSize": "Standard_E4ds_v5",
           "dataDiskSizesGB": [
@@ -229,7 +279,6 @@
           "serviceName": "IMOS – EUR"
         },
         "app-gateway-fes": {
-          "legacyRole": "App - Netweaver Gateway FES",
           "category": "sap",
           "vmSize": "Standard_E4ds_v5",
           "dataDiskSizesGB": [
@@ -242,7 +291,6 @@
           "serviceName": "SAP NETWEAVER GATEWAY - EUR"
         },
         "app-bw": {
-          "legacyRole": "App - SAP BW",
           "category": "sap",
           "vmSize": "Standard_E4ds_v5",
           "dataDiskSizesGB": [
@@ -255,7 +303,6 @@
           "serviceName": "SAP BUSINESS WAREHOUSE - EUR"
         },
         "app-utilities": {
-          "legacyRole": "App - S/4HANA Utilities",
           "category": "sap",
           "vmSize": "Standard_E4ds_v5",
           "dataDiskSizesGB": [
@@ -268,7 +315,6 @@
           "serviceName": "UTILITIES - EUR"
         },
         "app-cc": {
-          "legacyRole": "App - Convergent Charging",
           "category": "sap",
           "vmSize": "Standard_E4ds_v5",
           "dataDiskSizesGB": [
@@ -281,7 +327,6 @@
           "serviceName": "SAP HYBRIS BILLING - EUR"
         },
         "app-ci": {
-          "legacyRole": "App - Convergent Invoicing",
           "category": "sap",
           "vmSize": "Standard_E4ds_v5",
           "dataDiskSizesGB": [
@@ -294,7 +339,6 @@
           "serviceName": "SAP HYBRIS BILLING - EUR"
         },
         "app-som-abap": {
-          "legacyRole": "App - SOM (CRM ABAP)",
           "category": "sap",
           "vmSize": "Standard_E4ds_v5",
           "dataDiskSizesGB": [
@@ -307,7 +351,6 @@
           "serviceName": "SAP HYBRIS BILLING - EUR"
         },
         "app-som-java": {
-          "legacyRole": "App - SOM (CRM JAVA)",
           "category": "sap",
           "vmSize": "Standard_E4ds_v5",
           "dataDiskSizesGB": [
@@ -320,7 +363,6 @@
           "serviceName": "SAP HYBRIS BILLING - EUR"
         },
         "app-cloud-connector": {
-          "legacyRole": "App - Cloud Connector",
           "category": "sap",
           "vmSize": "Standard_E4ds_v5",
           "dataDiskSizesGB": [
@@ -333,7 +375,6 @@
           "serviceName": "SAP CLOUD CONNECTOR"
         },
         "db-nw-gateway": {
-          "legacyRole": "DB - NetWeaver Gateway (IMOS)",
           "category": "han",
           "hanaWorkload": "oltp",
           "vmSize": "Standard_E8ds_v5",
@@ -351,7 +392,6 @@
           "serviceName": "IMOS – EUR"
         },
         "db-po": {
-          "legacyRole": "DB - SAP PO (IMOS)",
           "category": "han",
           "hanaWorkload": "oltp",
           "vmSize": "Standard_E8ds_v5",
@@ -369,7 +409,6 @@
           "serviceName": "IMOS – EUR"
         },
         "db-gateway-fes": {
-          "legacyRole": "DB - Netweaver Gateway FES",
           "category": "han",
           "hanaWorkload": "oltp",
           "vmSize": "Standard_E8ds_v5",
@@ -387,7 +426,6 @@
           "serviceName": "SAP NETWEAVER GATEWAY - EUR"
         },
         "db-bw": {
-          "legacyRole": "DB - SAP BW",
           "category": "han",
           "hanaWorkload": "olap",
           "vmSize": "Standard_E16ds_v5",
@@ -405,7 +443,6 @@
           "serviceName": "SAP BUSINESS WAREHOUSE - EUR"
         },
         "db-utilities": {
-          "legacyRole": "DB - S/4HANA Utilities",
           "category": "han",
           "hanaWorkload": "oltp",
           "vmSize": "Standard_E32ds_v5",
@@ -423,7 +460,6 @@
           "serviceName": "UTILITIES - EUR"
         },
         "db-hybris": {
-          "legacyRole": "DB - S/4HANA Hybris Billing",
           "category": "han",
           "hanaWorkload": "oltp",
           "vmSize": "Standard_E32ds_v5",
@@ -921,6 +957,25 @@
       }
     },
     "catalog": "[variables('$fxv#0')]",
+    "singleVirtualMachines": [
+      {
+        "role": "[parameters('singleRole')]",
+        "instance": "[string(parameters('singleInstanceNumber'))]",
+        "nic1IpAddresses": [
+          "",
+          "",
+          "",
+          ""
+        ],
+        "nic2IpAddresses": [
+          "",
+          "",
+          "",
+          ""
+        ]
+      }
+    ],
+    "virtualMachines": "[if(equals(parameters('landscape'), 'single'), variables('singleVirtualMachines'), variables('catalog').landscapes[parameters('landscape')])]",
     "subnetPair": {
       "nic1": "[parameters('nic1SubnetName')]",
       "nic2": "[parameters('nic2SubnetName')]"
@@ -950,7 +1005,7 @@
             "value": "[padLeft(parameters('deploymentNumber'), 2, '0')]"
           },
           "virtualMachines": {
-            "value": "[variables('catalog').landscapes.cloudConnector]"
+            "value": "[variables('virtualMachines')]"
           },
           "image": {
             "value": {
@@ -1015,7 +1070,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.44.1.10279",
-              "templateHash": "1823314164120443936"
+              "templateHash": "2798511150393959667"
             }
           },
           "definitions": {
@@ -1351,7 +1406,7 @@
               "minLength": 2,
               "maxLength": 2,
               "metadata": {
-                "description": "Two-digit landscape identifier, retained from the legacy naming convention."
+                "description": "Two-digit landscape identifier used in resource names."
               }
             },
             "virtualMachines": {
@@ -1444,7 +1499,7 @@
                 "mode": "disabled"
               },
               "metadata": {
-                "description": "Reviewed replacement bootstrap only; the legacy scripts are never invoked. Disabled by default."
+                "description": "Reviewed custom-script bootstrap only. Disabled by default."
               }
             }
           },
@@ -1483,7 +1538,6 @@
               },
               "roles": {
                 "app-nw-gateway": {
-                  "legacyRole": "App - NetWeaver Gateway (IMOS)",
                   "category": "sap",
                   "vmSize": "Standard_E4ds_v5",
                   "dataDiskSizesGB": [
@@ -1496,7 +1550,6 @@
                   "serviceName": "IMOS – EUR"
                 },
                 "app-po": {
-                  "legacyRole": "App - SAP PO (IMOS)",
                   "category": "sap",
                   "vmSize": "Standard_E4ds_v5",
                   "dataDiskSizesGB": [
@@ -1509,7 +1562,6 @@
                   "serviceName": "IMOS – EUR"
                 },
                 "app-gateway-fes": {
-                  "legacyRole": "App - Netweaver Gateway FES",
                   "category": "sap",
                   "vmSize": "Standard_E4ds_v5",
                   "dataDiskSizesGB": [
@@ -1522,7 +1574,6 @@
                   "serviceName": "SAP NETWEAVER GATEWAY - EUR"
                 },
                 "app-bw": {
-                  "legacyRole": "App - SAP BW",
                   "category": "sap",
                   "vmSize": "Standard_E4ds_v5",
                   "dataDiskSizesGB": [
@@ -1535,7 +1586,6 @@
                   "serviceName": "SAP BUSINESS WAREHOUSE - EUR"
                 },
                 "app-utilities": {
-                  "legacyRole": "App - S/4HANA Utilities",
                   "category": "sap",
                   "vmSize": "Standard_E4ds_v5",
                   "dataDiskSizesGB": [
@@ -1548,7 +1598,6 @@
                   "serviceName": "UTILITIES - EUR"
                 },
                 "app-cc": {
-                  "legacyRole": "App - Convergent Charging",
                   "category": "sap",
                   "vmSize": "Standard_E4ds_v5",
                   "dataDiskSizesGB": [
@@ -1561,7 +1610,6 @@
                   "serviceName": "SAP HYBRIS BILLING - EUR"
                 },
                 "app-ci": {
-                  "legacyRole": "App - Convergent Invoicing",
                   "category": "sap",
                   "vmSize": "Standard_E4ds_v5",
                   "dataDiskSizesGB": [
@@ -1574,7 +1622,6 @@
                   "serviceName": "SAP HYBRIS BILLING - EUR"
                 },
                 "app-som-abap": {
-                  "legacyRole": "App - SOM (CRM ABAP)",
                   "category": "sap",
                   "vmSize": "Standard_E4ds_v5",
                   "dataDiskSizesGB": [
@@ -1587,7 +1634,6 @@
                   "serviceName": "SAP HYBRIS BILLING - EUR"
                 },
                 "app-som-java": {
-                  "legacyRole": "App - SOM (CRM JAVA)",
                   "category": "sap",
                   "vmSize": "Standard_E4ds_v5",
                   "dataDiskSizesGB": [
@@ -1600,7 +1646,6 @@
                   "serviceName": "SAP HYBRIS BILLING - EUR"
                 },
                 "app-cloud-connector": {
-                  "legacyRole": "App - Cloud Connector",
                   "category": "sap",
                   "vmSize": "Standard_E4ds_v5",
                   "dataDiskSizesGB": [
@@ -1613,7 +1658,6 @@
                   "serviceName": "SAP CLOUD CONNECTOR"
                 },
                 "db-nw-gateway": {
-                  "legacyRole": "DB - NetWeaver Gateway (IMOS)",
                   "category": "han",
                   "hanaWorkload": "oltp",
                   "vmSize": "Standard_E8ds_v5",
@@ -1631,7 +1675,6 @@
                   "serviceName": "IMOS – EUR"
                 },
                 "db-po": {
-                  "legacyRole": "DB - SAP PO (IMOS)",
                   "category": "han",
                   "hanaWorkload": "oltp",
                   "vmSize": "Standard_E8ds_v5",
@@ -1649,7 +1692,6 @@
                   "serviceName": "IMOS – EUR"
                 },
                 "db-gateway-fes": {
-                  "legacyRole": "DB - Netweaver Gateway FES",
                   "category": "han",
                   "hanaWorkload": "oltp",
                   "vmSize": "Standard_E8ds_v5",
@@ -1667,7 +1709,6 @@
                   "serviceName": "SAP NETWEAVER GATEWAY - EUR"
                 },
                 "db-bw": {
-                  "legacyRole": "DB - SAP BW",
                   "category": "han",
                   "hanaWorkload": "olap",
                   "vmSize": "Standard_E16ds_v5",
@@ -1685,7 +1726,6 @@
                   "serviceName": "SAP BUSINESS WAREHOUSE - EUR"
                 },
                 "db-utilities": {
-                  "legacyRole": "DB - S/4HANA Utilities",
                   "category": "han",
                   "hanaWorkload": "oltp",
                   "vmSize": "Standard_E32ds_v5",
@@ -1703,7 +1743,6 @@
                   "serviceName": "UTILITIES - EUR"
                 },
                 "db-hybris": {
-                  "legacyRole": "DB - S/4HANA Hybris Billing",
                   "category": "han",
                   "hanaWorkload": "oltp",
                   "vmSize": "Standard_E32ds_v5",

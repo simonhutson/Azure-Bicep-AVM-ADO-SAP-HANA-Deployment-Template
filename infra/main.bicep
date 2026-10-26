@@ -21,7 +21,7 @@ param location string = resourceGroup().location
 @maxLength(12)
 param namePrefix string
 
-@description('Two-digit landscape identifier, retained from the legacy naming convention.')
+@description('Two-digit landscape identifier used in resource names.')
 @minLength(2)
 @maxLength(2)
 param deploymentNumber string
@@ -65,7 +65,7 @@ param deploymentSource 'Azure DevOps / Bicep AVM' | 'Azure portal / Bicep AVM' =
 @description('Enable host encryption. Confirm regional/SKU support and the subscription EncryptionAtHost feature.')
 param encryptionAtHost bool = true
 
-@description('Reviewed replacement bootstrap only; the legacy scripts are never invoked. Disabled by default.')
+@description('Reviewed custom-script bootstrap only. Disabled by default.')
 param bootstrap bootstrapType = {
   mode: 'disabled'
 }

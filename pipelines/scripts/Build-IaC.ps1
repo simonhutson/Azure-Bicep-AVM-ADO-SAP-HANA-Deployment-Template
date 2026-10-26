@@ -38,8 +38,31 @@ foreach ($environment in 'development', 'test', 'production') {
 }
 Copy-Item -LiteralPath (Join-Path $root 'infra\catalog.json') -Destination (Join-Path $OutputDirectory 'catalog.json')
 if ($UpdatePortalTemplate) {
-    Copy-Item -LiteralPath (Join-Path $OutputDirectory 'development.portal.json') -Destination (Join-Path $root 'infra\portal\development.json')
-    Write-Host 'Refreshed the published development portal template.'
+    $profiles = [ordered]@{
+        single = 'single.json'
+        full = 'full.json'
+        netweaverGateway = 'netweaver-gateway.json'
+        gatewayFes = 'gateway-fes.json'
+        sapPo = 'sap-po.json'
+        sapBw = 'sap-bw.json'
+        utilities = 's4hana-utilities.json'
+        cloudConnector = 'development.json'
+        hybrisBilling = 's4hana-hybris-billing.json'
+    }
+    $portal = Get-Content -LiteralPath (Join-Path $OutputDirectory 'development.portal.json') -Raw | ConvertFrom-Json
+    if (@(Compare-Object @($profiles.Keys | Sort-Object) @($portal.parameters.landscape.allowedValues | Sort-Object)).Count -gt 0) {
+        throw 'Published portal profiles must match the profiles allowed by the Bicep entry point.'
+    }
+    # Profile defaults change after compilation, so the compiler hash must not describe the modified template.
+    $portal.metadata._generator.PSObject.Properties.Remove('templateHash')
+    foreach ($profile in $profiles.GetEnumerator()) {
+        $portal.parameters.landscape.defaultValue = $profile.Key
+        $portal.parameters.landscape.allowedValues = @($profile.Key)
+        $portal.metadata | Add-Member -NotePropertyName portalProfile -NotePropertyValue $profile.Key -Force
+        $portal | ConvertTo-Json -Depth 100 |
+            Set-Content -LiteralPath (Join-Path $root "infra\portal\$($profile.Value)") -Encoding utf8
+    }
+    Write-Host "Refreshed $($profiles.Count) published development portal templates."
 }
 
 $hashes = [ordered]@{}
