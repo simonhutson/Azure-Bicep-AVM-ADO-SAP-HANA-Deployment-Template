@@ -33,7 +33,7 @@ There are no new per-property deployment modules, remotely hosted template links
 
 ## Preserved Behavior
 
-- All sixteen roles, original compute-size evidence, data-disk capacities/order, service classifications and availability-set suffixes. Active VM selections follow the environment-specific SAP policy below, rather than the legacy Esv3 sizes.
+- All sixteen roles, data-disk capacities/order, service classifications and availability-set suffixes. Active VM selections follow the environment-specific SAP policy below, rather than the legacy Esv3 sizes.
 - Two private NICs per VM, with NIC 1 primary. Each NIC supports one to four ordered IPv4 configurations. The first configuration is primary on each NIC, implemented by the AVM.
 - Blank address entries mean dynamic allocation; nonblank entries mean static allocation. Database roles enable accelerated networking on both NICs; application roles do not.
 - Role-specific subnet pairs, aligned availability sets with two fault domains and twenty update domains, ownership tags and deterministic disk/NIC names.
@@ -46,7 +46,7 @@ The catalogue preserves the actual legacy PO 31 GB disk and Hybris 256 GB disks,
 
 | Legacy behavior | New behavior |
 |---|---|
-| Esv3 sizes reused for every environment | Edsv5 application/nonproduction candidates; exact workload-certified production HANA defaults, with original sizes retained as `legacyVmSize` evidence. |
+| Esv3 sizes reused for every environment | Edsv5 application/nonproduction candidates; exact workload-certified production HANA defaults. |
 | Subscription display name and UK South hard-coded in validation | Environment-specific targets and configurable regions; pipeline verifies subscription identity and VNet location. |
 | SLES 12 SP1/SP2/SP3, image version `latest` | SLES for SAP 15 BYOS, explicit image version required before authenticated planning. |
 | Password administrator login | Public SSH key; password authentication always disabled. |

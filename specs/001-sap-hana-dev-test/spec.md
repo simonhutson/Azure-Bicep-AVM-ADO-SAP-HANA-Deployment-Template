@@ -198,7 +198,7 @@ Counts apply to the selected deployment's identities, not to all pre-existing re
 
 **Decision and evidence date**: 2026-10-26.
 
-**Scope**: The active Bicep/AVM replacement only. The archived ARM sizes remain historical evidence; the replacement retains them as `legacyVmSize` in [the catalogue](../../infra/catalog.json).
+**Scope**: The active Bicep/AVM replacement only. The archived ARM sizes remain historical evidence; [the catalogue](../../infra/catalog.json) defines the replacement's environment-specific VM selections.
 
 **Confirmed decision**: Require workload-specific HANA-certified SKU selections for **production**, while retaining smaller development/test candidates. A family name, an Azure-supported size, a NetWeaver listing, and a HANA certification are not interchangeable support claims.
 

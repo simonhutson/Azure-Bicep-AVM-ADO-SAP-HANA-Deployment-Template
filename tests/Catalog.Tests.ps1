@@ -18,7 +18,6 @@ BeforeAll {
     $script:Root = Split-Path $PSScriptRoot
     $script:Archive = Join-Path $Root 'archive'
     $catalog = Get-Content -LiteralPath (Join-Path $Root 'infra\catalog.json') -Raw | ConvertFrom-Json -AsHashtable
-    $legacySizes = Get-Content -LiteralPath (Join-Path $Archive 'settings.vm.hardwareprofile.json') -Raw | ConvertFrom-Json -AsHashtable
     $legacyDisks = Get-Content -LiteralPath (Join-Path $Archive 'settings.vm.storageprofile.datadisks.json') -Raw | ConvertFrom-Json -AsHashtable
     $legacyTags = Get-Content -LiteralPath (Join-Path $Archive 'tags.json') -Raw | ConvertFrom-Json -AsHashtable
     $core = Get-Content -LiteralPath (Join-Path $Archive 'azuredeploy.json') -Raw | ConvertFrom-Json -AsHashtable
@@ -39,9 +38,8 @@ Describe 'Source-grounded role catalogue' {
         $catalog.roles.Count | Should -Be 16
         @($catalog.roles.Values.legacyRole | Sort-Object) -join '|' | Should -Be (@($core.parameters.vmRole.allowedValues | Sort-Object) -join '|')
     }
-    It 'preserves historical compute evidence, ordered disks and service tags for <Role>' -ForEach $roles {
+    It 'preserves ordered disks and service tags for <Role>' -ForEach $roles {
         $profile = $catalog.roles[$Role]
-        $profile.legacyVmSize | Should -Be $legacySizes.variables.vmSize.'SAP Dev Test'[$profile.legacyRole]
         ($profile.dataDiskSizesGB -join ',') | Should -Be ($legacyDisks.variables.diskSizes.'SAP Dev Test'[$profile.legacyRole].disks.diskSizeGB -join ',')
         $profile.serviceName | Should -Be $legacyTags.variables.tagServiceNames[$profile.legacyRole].tagServiceName
     }
