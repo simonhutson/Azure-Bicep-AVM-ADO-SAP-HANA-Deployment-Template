@@ -54,7 +54,7 @@ function Get-WhatIfDigest {
 $manifestPath = Join-Path $ArtifactDirectory 'manifest.json'
 $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json -AsHashtable
 if ($manifest.sourceVersion -cne $SourceVersion) { throw 'Artifact commit does not match this pipeline run.' }
-$expectedFiles = @('catalog.json', 'main.json', 'development.parameters.json', 'test.parameters.json', 'production.parameters.json')
+$expectedFiles = @('catalog.json', 'main.json', 'development.portal.json', 'development.parameters.json', 'test.parameters.json', 'production.parameters.json')
 if (@(Compare-Object ($expectedFiles | Sort-Object) @($manifest.files.Keys | Sort-Object)).Count -gt 0) { throw 'Artifact manifest has an unexpected file set.' }
 foreach ($file in $expectedFiles) {
     $hash = (Get-FileHash -LiteralPath (Join-Path $ArtifactDirectory $file) -Algorithm SHA256).Hash

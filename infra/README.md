@@ -1,6 +1,6 @@
 # SAP infrastructure with Bicep and Azure Verified Modules
 
-This is a pipeline-oriented replacement for the manually launched ARM deployment, not an SAP installer or a production HA design.
+This is a Bicep/AVM replacement for the legacy ARM deployment, with Azure DevOps delivery and a separate development portal entry point. It is not an SAP installer or a production HA design.
 
 The original ARM files were already infrastructure as code. Their fine-grained linked templates deliberately mirrored ARM property boundaries. They and their supporting assets are preserved unchanged in [archive/](../archive/). The replacement changes the authoring and delivery model: VM profiles are ordinary configuration, while resource-sized Azure Verified Modules (AVMs) own resource implementation.
 
@@ -12,6 +12,8 @@ The original ARM files were already infrastructure as code. Their fine-grained l
 | [types.bicep](types.bicep) | Compile-time contracts for roles, instances, networking, ownership, images and bootstrap. No deployments. |
 | [catalog.json](catalog.json) | Sixteen role profiles and eight landscape presets replacing the landscape wrappers. |
 | [environments/](environments/) | Independent development, test and production Bicep parameter files. |
+| [portal/development.bicep](portal/development.bicep) | Development-only portal wrapper around the shared entry point; fixed Cloud Connector preset and flat operator inputs. |
+| [portal/development.json](portal/development.json) | Generated, publicly hosted ARM JSON used by the development portal button. |
 | [../azure-pipelines.yml](../azure-pipelines.yml) | Credential-free build/lint/test CI. |
 | [../pipelines/deploy.yml](../pipelines/deploy.yml) | Manually queued, environment-selected plan/approval/deploy workflow. |
 | [../pipelines/README.md](../pipelines/README.md) | Service connection, permission, approval and pipeline setup. |
@@ -23,6 +25,8 @@ Pinned dependencies:
 - Bicep and test dependencies in [the tool-version manifest](../pipelines/tools.psd1).
 
 There are no new per-property deployment modules, remotely hosted template links, or secret-forwarding helper deployments. AVM internals still compile to nested deployments; flattening the source does not mean removing resource-level module boundaries.
+
+The [development portal instructions](../README.md) describe the manual alternative to Azure DevOps. Required inputs are scalar fields in the standard portal form; only images requiring a marketplace purchase plan need the optional plan object. It retains SSH-only access, host encryption and disabled bootstrap, and does not expose environment, VM-size or disk-size overrides. Source tags distinguish portal deployments from the unchanged Azure DevOps default. The portal does not execute pipeline preflight or approvals; operators must perform the documented support and capability checks.
 
 ## Confirmed Migration Decisions
 

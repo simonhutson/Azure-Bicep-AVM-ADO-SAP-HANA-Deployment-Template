@@ -59,6 +59,9 @@ param sapSupportReviewReference string
 @description('Additional resource tags. Required ownership/management tags cannot be overridden.')
 param additionalTags object = {}
 
+@description('Deployment entry point recorded in the Source tag.')
+param deploymentSource 'Azure DevOps / Bicep AVM' | 'Azure portal / Bicep AVM' = 'Azure DevOps / Bicep AVM'
+
 @description('Enable host encryption. Confirm regional/SKU support and the subscription EncryptionAtHost feature.')
 param encryptionAtHost bool = true
 
@@ -79,7 +82,7 @@ var commonTags = union(additionalTags, {
   Environment: environmentName
   'Service Owner': ownership.serviceOwner
   'Service Ticket Request ID': ownership.serviceTicketRequestId
-  Source: 'Azure DevOps / Bicep AVM'
+  Source: deploymentSource
   'Project Name': ownership.projectName
   'Cost Code ID': ownership.costCodeId
   ManagedBy: 'Bicep-AVM'

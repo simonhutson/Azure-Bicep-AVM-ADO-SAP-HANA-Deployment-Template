@@ -61,9 +61,9 @@ Build (no Azure identity)
 ### Build
 
 - Restores pinned Bicep, Pester and YAML-parser versions from [tools.psd1](tools.psd1) when missing.
-- Builds/lints Bicep and compiles all three environment parameter files.
-- Runs [the test suite](../tests/) and publishes test results.
-- Publishes the `iac` artifact containing the compiled template, compiled parameters, catalogue and a SHA-256/source-commit manifest.
+- Builds/lints the shared Bicep entry point and development portal wrapper, and compiles all three environment parameter files.
+- Runs [the test suite](../tests/), including published portal-template freshness and development-default parity, and publishes test results.
+- Publishes the `iac` artifact containing the shared and portal templates, compiled parameters, catalogue and a SHA-256/source-commit manifest. Maintainers refresh the committed portal JSON with `Build-IaC.ps1 -UpdatePortalTemplate`; portal users do not need to run a pipeline.
 
 ### Plan
 

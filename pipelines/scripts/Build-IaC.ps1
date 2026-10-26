@@ -2,7 +2,8 @@
 [CmdletBinding()]
 param(
     [string] $OutputDirectory = (Join-Path $PSScriptRoot '..\..\.build\iac'),
-    [string] $SourceVersion = $env:BUILD_SOURCEVERSION
+    [string] $SourceVersion = $env:BUILD_SOURCEVERSION,
+    [switch] $UpdatePortalTemplate
 )
 
 $ErrorActionPreference = 'Stop'
@@ -23,17 +24,23 @@ if ($SourceVersion -notmatch '^[0-9a-f]{40}$') { throw 'A full source commit SHA
 
 $null = New-Item -ItemType Directory -Path $OutputDirectory -Force
 $OutputDirectory = (Resolve-Path $OutputDirectory).Path
-$files = @('main.json', 'catalog.json', 'development.parameters.json', 'test.parameters.json', 'production.parameters.json')
+$files = @('main.json', 'development.portal.json', 'catalog.json', 'development.parameters.json', 'test.parameters.json', 'production.parameters.json')
 $unexpected = @(Get-ChildItem -LiteralPath $OutputDirectory -Force | Where-Object Name -NotIn ($files + 'manifest.json'))
 if ($unexpected.Count -gt 0) { throw 'Output directory contains unrelated files. Select a dedicated build directory.' }
 
 & az bicep build --file (Join-Path $root 'infra\main.bicep') --outfile (Join-Path $OutputDirectory 'main.json') --only-show-errors
 if ($LASTEXITCODE -ne 0) { throw 'Bicep build/lint failed.' }
+& az bicep build --file (Join-Path $root 'infra\portal\development.bicep') --outfile (Join-Path $OutputDirectory 'development.portal.json') --only-show-errors
+if ($LASTEXITCODE -ne 0) { throw 'Development portal build/lint failed.' }
 foreach ($environment in 'development', 'test', 'production') {
     & az bicep build-params --file (Join-Path $root "infra\environments\$environment.bicepparam") --outfile (Join-Path $OutputDirectory "$environment.parameters.json") --only-show-errors
     if ($LASTEXITCODE -ne 0) { throw "Bicep parameter build failed for $environment." }
 }
 Copy-Item -LiteralPath (Join-Path $root 'infra\catalog.json') -Destination (Join-Path $OutputDirectory 'catalog.json')
+if ($UpdatePortalTemplate) {
+    Copy-Item -LiteralPath (Join-Path $OutputDirectory 'development.portal.json') -Destination (Join-Path $root 'infra\portal\development.json')
+    Write-Host 'Refreshed the published development portal template.'
+}
 
 $hashes = [ordered]@{}
 foreach ($file in $files) {
