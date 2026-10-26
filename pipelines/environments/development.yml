@@ -1,0 +1,6 @@
+variables:
+  planServiceConnection: REQUIRED_DEVELOPMENT_PLAN_WIF_CONNECTION
+  deployServiceConnection: REQUIRED_DEVELOPMENT_DEPLOY_WIF_CONNECTION
+  subscriptionId: REQUIRED_DEVELOPMENT_SUBSCRIPTION_ID
+  resourceGroupName: REQUIRED_DEVELOPMENT_RESOURCE_GROUP
+  deploymentEnvironment: sap-development

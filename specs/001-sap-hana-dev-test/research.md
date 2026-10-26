@@ -4,9 +4,11 @@
 
 **Related specification**: [spec.md](spec.md)
 
+The original manual workflow intentionally decomposed ARM properties into linked templates. The original analysis remains the historical as-is record; the separately labelled [SAP VM support decision evidence](#sap-vm-support-decision-evidence---bicepavm) at the end applies to the replacement. The [Bicep/AVM implementation](../../infra/README.md) flattens authoring at resource boundaries and uses Azure DevOps for delivery; the original ARM files and supporting assets are preserved unchanged in [archive/](../../archive/).
+
 ## Evidence and Interpretation
 
-This analysis covers all 40 ARM template files, seven parameter examples, and six shell scripts in the workspace. The [original README](../../README.md) describes the intended use, but template values take precedence when documentation and code disagree.
+This analysis covers all 40 ARM template files, seven parameter examples, and six shell scripts in [archive/](../../archive/). The historical sections of the [README](../../README.md) describe the intended use, but template values take precedence when documentation and code disagree.
 
 Three categories are kept separate:
 
@@ -32,11 +34,11 @@ Selected operator-facing wrapper
             -> Custom Script extension (after VM)
 ```
 
-- All nine wrappers call [azuredeploy.json](../../azuredeploy.json). Their peer VM deployments have empty dependency lists; application/database ordering is not established.
-- The core calls [validate.json](../../validate.json), then [tags.json](../../tags.json) and [settings.json](../../settings.json), then [deploy.json](../../deploy.json).
-- Validation reads two existing secrets through [validate.keyvault.json](../../validate.keyvault.json) and emits one normalized parameter object.
-- Property assembly delegates to [settings.vm.json](../../settings.vm.json), [settings.nic1.json](../../settings.nic1.json), [settings.nic2.json](../../settings.nic2.json), availability-set settings, and extension settings.
-- VM property assembly further delegates storage assembly to [settings.vm.storageprofile.json](../../settings.vm.storageprofile.json). The remaining leaf templates return property values without creating infrastructure.
+- All nine wrappers call [azuredeploy.json](../../archive/azuredeploy.json). Their peer VM deployments have empty dependency lists; application/database ordering is not established.
+- The core calls [validate.json](../../archive/validate.json), then [tags.json](../../archive/tags.json) and [settings.json](../../archive/settings.json), then [deploy.json](../../archive/deploy.json).
+- Validation reads two existing secrets through [validate.keyvault.json](../../archive/validate.keyvault.json) and emits one normalized parameter object.
+- Property assembly delegates to [settings.vm.json](../../archive/settings.vm.json), [settings.nic1.json](../../archive/settings.nic1.json), [settings.nic2.json](../../archive/settings.nic2.json), availability-set settings, and extension settings.
+- VM property assembly further delegates storage assembly to [settings.vm.storageprofile.json](../../archive/settings.vm.storageprofile.json). The remaining leaf templates return property values without creating infrastructure.
 - Child template URIs are resolved relative to `deployment().properties.templateLink.uri`. The parent must therefore have a usable linked-template URI and the sibling templates must be retrievable by Azure. Deploying only a local file is not a self-contained substitute.
 - Every declared linked deployment uses `Incremental`. This avoids intentional pruning by those child deployments, but is not transactional rollback, bootstrap idempotency, or protection against an independently selected outer complete-mode deployment.
 
@@ -48,15 +50,15 @@ Counts describe **requested topology**, not verified successful deployments. Ins
 
 | Entry point | Requested roles and instances | VM count | Parameter example |
 |---|---|---:|---|
-| [azuredeploy.single.json](../../azuredeploy.single.json) | Caller selects any shared role and one-character instance | 1 | [Single example](../../azuredeploy.single.parameters.json) |
-| [azuredeploy.netweavergateway.json](../../azuredeploy.netweavergateway.json) | App NetWeaver Gateway `1`; DB NetWeaver Gateway `0`; both role strings omit required `(IMOS)` | 2 | [NetWeaver example](../../azuredeploy.netweavergateway.parameters.json) |
-| [azuredeploy.gatewayfes.json](../../azuredeploy.gatewayfes.json) | App Gateway FES `2`; DB Gateway FES `2` | 2 | [Gateway FES example](../../azuredeploy.gatewayfes.parameters.json) |
-| [azuredeploy.sappo.json](../../azuredeploy.sappo.json) | App SAP PO `1`; DB SAP PO `1` | 2 | [SAP PO example](../../azuredeploy.sappo.parameters.json) |
-| [azuredeploy.sapbw.json](../../azuredeploy.sapbw.json) | App SAP BW `3`; DB SAP BW `3` | 2 | [SAP BW example](../../azuredeploy.sapbw.parameters.json) |
-| [azuredeploy.s4hanautilities.json](../../azuredeploy.s4hanautilities.json) | App S/4HANA Utilities `4`; DB S/4HANA Utilities `4` | 2 | [Utilities example](../../azuredeploy.s4hanautilities.parameters.json) |
-| [azuredeploy.cloudconnector.json](../../azuredeploy.cloudconnector.json) | App Cloud Connector `9` | 1 | [Cloud Connector example](../../azuredeploy.cloudconnector.parameters.json) |
-| [azuredeploy.s4hanahybrisbilling.json](../../azuredeploy.s4hanahybrisbilling.json) | App Convergent Charging `5`, Convergent Invoicing `6`, SOM ABAP `7`, SOM JAVA `8`; DB Hybris Billing `5` | 5 | None supplied |
-| [azuredeploy.full.json](../../azuredeploy.full.json) | All ten app roles `0`-`9` and six DB roles `0`-`5`, as listed below | 16 | None supplied |
+| [azuredeploy.single.json](../../archive/azuredeploy.single.json) | Caller selects any shared role and one-character instance | 1 | [Single example](../../archive/azuredeploy.single.parameters.json) |
+| [azuredeploy.netweavergateway.json](../../archive/azuredeploy.netweavergateway.json) | App NetWeaver Gateway `1`; DB NetWeaver Gateway `0`; both role strings omit required `(IMOS)` | 2 | [NetWeaver example](../../archive/azuredeploy.netweavergateway.parameters.json) |
+| [azuredeploy.gatewayfes.json](../../archive/azuredeploy.gatewayfes.json) | App Gateway FES `2`; DB Gateway FES `2` | 2 | [Gateway FES example](../../archive/azuredeploy.gatewayfes.parameters.json) |
+| [azuredeploy.sappo.json](../../archive/azuredeploy.sappo.json) | App SAP PO `1`; DB SAP PO `1` | 2 | [SAP PO example](../../archive/azuredeploy.sappo.parameters.json) |
+| [azuredeploy.sapbw.json](../../archive/azuredeploy.sapbw.json) | App SAP BW `3`; DB SAP BW `3` | 2 | [SAP BW example](../../archive/azuredeploy.sapbw.parameters.json) |
+| [azuredeploy.s4hanautilities.json](../../archive/azuredeploy.s4hanautilities.json) | App S/4HANA Utilities `4`; DB S/4HANA Utilities `4` | 2 | [Utilities example](../../archive/azuredeploy.s4hanautilities.parameters.json) |
+| [azuredeploy.cloudconnector.json](../../archive/azuredeploy.cloudconnector.json) | App Cloud Connector `9` | 1 | [Cloud Connector example](../../archive/azuredeploy.cloudconnector.parameters.json) |
+| [azuredeploy.s4hanahybrisbilling.json](../../archive/azuredeploy.s4hanahybrisbilling.json) | App Convergent Charging `5`, Convergent Invoicing `6`, SOM ABAP `7`, SOM JAVA `8`; DB Hybris Billing `5` | 5 | None supplied |
+| [azuredeploy.full.json](../../archive/azuredeploy.full.json) | All ten app roles `0`-`9` and six DB roles `0`-`5`, as listed below | 16 | None supplied |
 
 FULL requests 16 VMs, 32 NICs, 16 distinct availability sets, 16 OS disks, 74 data disks, and 16 extensions. Disks are requested within VM storage profiles, not through standalone disk templates.
 
@@ -92,7 +94,7 @@ Examples can override these defaults: the single example uses `4 / 3`, and the G
 
 ## Naming Contract
 
-Normalization in [validate.json](../../validate.json) lowercases names and derives:
+Normalization in [validate.json](../../archive/validate.json) lowercases names and derives:
 
 | Identity | Formula or example |
 |---|---|
@@ -108,7 +110,7 @@ Applications use `sap`; databases use `han`. Availability-set names exclude inst
 
 ## Role Catalogue
 
-Compute sizes come from [hardware settings](../../settings.vm.hardwareprofile.json); disk capacities and order come from [data-disk settings](../../settings.vm.storageprofile.datadisks.json). Capacities below are the literal `diskSizeGB` values, listed in LUN order beginning at zero. They are not a new sizing recommendation.
+Compute sizes come from [hardware settings](../../archive/settings.vm.hardwareprofile.json); disk capacities and order come from [data-disk settings](../../archive/settings.vm.storageprofile.datadisks.json). Capacities below are the literal `diskSizeGB` values, listed in LUN order beginning at zero. They are not a new sizing recommendation.
 
 | Exact shared role | FULL instance | VM size | Data disks, GB in LUN order | Availability-set suffix |
 |---|---:|---|---|---|
@@ -131,19 +133,19 @@ Compute sizes come from [hardware settings](../../settings.vm.hardwareprofile.js
 
 ### Shared VM Settings
 
-- [Image-reference settings](../../settings.vm.storageprofile.imagereference.json): publisher `SUSE`, offer `SLES-SAP-BYOS`, SKU `12-SP1`, `12-SP2`, or `12-SP3`, version `latest`. There is no custom-image selection path despite the README's broader wording.
-- [OS-disk settings](../../settings.vm.storageprofile.osdisk.json): Linux, `FromImage`, `ReadWrite` caching, explicitly `Premium_LRS`; no explicit OS-disk capacity.
-- [OS-profile settings](../../settings.vm.osprofile.json): computer name, administrator username, and password. SSH-key authentication is not configured.
-- [Availability-set settings](../../settings.availabilityset.json): twenty update domains and two fault domains; [VM availability-set settings](../../settings.vm.availabilityset.json) reference the derived availability-set resource ID.
-- [Diagnostic settings](../../settings.vm.diagnosticsprofile.json): boot diagnostics enabled at `https://azsudsapvmdiags.blob.core.windows.net/`.
-- [Network-profile settings](../../settings.vm.networkprofile.json): both NIC IDs attached; NIC 1 primary, NIC 2 secondary.
+- [Image-reference settings](../../archive/settings.vm.storageprofile.imagereference.json): publisher `SUSE`, offer `SLES-SAP-BYOS`, SKU `12-SP1`, `12-SP2`, or `12-SP3`, version `latest`. There is no custom-image selection path despite the README's broader wording.
+- [OS-disk settings](../../archive/settings.vm.storageprofile.osdisk.json): Linux, `FromImage`, `ReadWrite` caching, explicitly `Premium_LRS`; no explicit OS-disk capacity.
+- [OS-profile settings](../../archive/settings.vm.osprofile.json): computer name, administrator username, and password. SSH-key authentication is not configured.
+- [Availability-set settings](../../archive/settings.availabilityset.json): twenty update domains and two fault domains; [VM availability-set settings](../../archive/settings.vm.availabilityset.json) reference the derived availability-set resource ID.
+- [Diagnostic settings](../../archive/settings.vm.diagnosticsprofile.json): boot diagnostics enabled at `https://azsudsapvmdiags.blob.core.windows.net/`.
+- [Network-profile settings](../../archive/settings.vm.networkprofile.json): both NIC IDs attached; NIC 1 primary, NIC 2 secondary.
 - Data disks use `createOption: Empty` and sequential LUNs; their storage account type and caching mode are not explicitly set. The README's P-tier descriptions are not an explicit data-disk SKU contract in the template.
 
 ## Network Contract
 
 The existing networking resource group is `azsu-rg-sap-devtest-defaultnetworking-001`, with VNet `azsu-vnet-devtest-sap-001`.
 
-[NIC 1 IP settings](../../settings.nic1.ipconfigurations.json) and [NIC 2 IP settings](../../settings.nic2.ipconfigurations.json) select these subnet pairs:
+[NIC 1 IP settings](../../archive/settings.nic1.ipconfigurations.json) and [NIC 2 IP settings](../../archive/settings.nic2.ipconfigurations.json) select these subnet pairs:
 
 | Role family, for both app and DB where present | NIC 1 subnet | NIC 2 subnet |
 |---|---|---|
@@ -156,8 +158,8 @@ The existing networking resource group is `azsu-rg-sap-devtest-defaultnetworking
 
 - Each array entry becomes `ipconfig00`, `ipconfig01`, etc., in input order.
 - Empty strings request `Dynamic`; other values request `Static`. Configuration zero is primary on each NIC. The generated IP-level `primary` values are string expressions returning `'true'`/`'false'`, not native Boolean literals; live schema/coercion behavior was not tested.
-- [NIC 1 acceleration settings](../../settings.nic1.enableacceleratednetworking.json) and [NIC 2 acceleration settings](../../settings.nic2.enableacceleratednetworking.json) enable acceleration for all six DB roles and disable it for all ten app roles.
-- [NIC 1 DNS settings](../../settings.nic1.dnssettings.json) and [NIC 2 DNS settings](../../settings.nic2.dnssettings.json) specify `azure.uk.centricaplc.com` as internal suffix and empty `dnsServers`/`appliedDnsServers` arrays.
+- [NIC 1 acceleration settings](../../archive/settings.nic1.enableacceleratednetworking.json) and [NIC 2 acceleration settings](../../archive/settings.nic2.enableacceleratednetworking.json) enable acceleration for all six DB roles and disable it for all ten app roles.
+- [NIC 1 DNS settings](../../archive/settings.nic1.dnssettings.json) and [NIC 2 DNS settings](../../archive/settings.nic2.dnssettings.json) specify `azure.uk.centricaplc.com` as internal suffix and empty `dnsServers`/`appliedDnsServers` arrays.
 - No public IP, load balancer, NSG, VNet, or subnet is created here. Existing network-level controls are outside this template.
 - Azure-side secondary IP configuration is not equivalent to complete guest configuration. The local scripts do not configure every guest secondary address or route.
 
@@ -167,19 +169,19 @@ The only non-deployment resource declarations are the five leaf resources below.
 
 | Leaf template | Resource type | API version | Dependency enforced by parent |
 |---|---|---|---|
-| [deploy.nic1.json](../../deploy.nic1.json) | `Microsoft.Network/networkInterfaces` | `2018-08-01` | None of the other four |
-| [deploy.nic2.json](../../deploy.nic2.json) | `Microsoft.Network/networkInterfaces` | `2018-08-01` | None of the other four |
-| [deploy.availabilityset.json](../../deploy.availabilityset.json) | `Microsoft.Compute/availabilitySets`, SKU `Aligned` | `2018-06-01` | None of the other four |
-| [deploy.vm.json](../../deploy.vm.json) | `Microsoft.Compute/virtualMachines` | `2018-06-01` | Both NICs and availability set |
-| [deploy.customscriptextension.json](../../deploy.customscriptextension.json) | `Microsoft.Compute/virtualMachines/extensions` | `2018-06-01` | VM |
+| [deploy.nic1.json](../../archive/deploy.nic1.json) | `Microsoft.Network/networkInterfaces` | `2018-08-01` | None of the other four |
+| [deploy.nic2.json](../../archive/deploy.nic2.json) | `Microsoft.Network/networkInterfaces` | `2018-08-01` | None of the other four |
+| [deploy.availabilityset.json](../../archive/deploy.availabilityset.json) | `Microsoft.Compute/availabilitySets`, SKU `Aligned` | `2018-06-01` | None of the other four |
+| [deploy.vm.json](../../archive/deploy.vm.json) | `Microsoft.Compute/virtualMachines` | `2018-06-01` | Both NICs and availability set |
+| [deploy.customscriptextension.json](../../archive/deploy.customscriptextension.json) | `Microsoft.Compute/virtualMachines/extensions` | `2018-06-01` | VM |
 
 Linked deployment resources use API `2017-05-10`; the templates declare the `2015-01-01` deployment-template schema and content version `1.0.0.0`.
 
 ### Tags and Outputs
 
-[Tag assembly](../../tags.json) derives `Environment` from the subscription and `Service Name` from the role. Service families are IMOS, NetWeaver Gateway, SAP Business Warehouse, Utilities, SAP Hybris Billing, and SAP Cloud Connector. The other five tag values are passed through from inputs. All five resource surfaces above receive the tag object; separately inherited tags on implicit disks are not established by this analysis.
+[Tag assembly](../../archive/tags.json) derives `Environment` from the subscription and `Service Name` from the role. Service families are IMOS, NetWeaver Gateway, SAP Business Warehouse, Utilities, SAP Hybris Billing, and SAP Cloud Connector. The other five tag values are passed through from inputs. All five resource surfaces above receive the tag object; separately inherited tags on implicit disks are not established by this analysis.
 
-[Resource deployment](../../deploy.json) emits `output` containing `availabilitySet`, `vm`, `nic1`, `nic2`, and `customScriptExtension` reference objects. [The core](../../azuredeploy.json) forwards that aggregate. Every operator-facing wrapper declares `outputs: {}`; there is no explicit wrapper output for a private IP, connection string, SAP URL, or readiness indicator.
+[Resource deployment](../../archive/deploy.json) emits `output` containing `availabilitySet`, `vm`, `nic1`, `nic2`, and `customScriptExtension` reference objects. [The core](../../archive/azuredeploy.json) forwards that aggregate. Every operator-facing wrapper declares `outputs: {}`; there is no explicit wrapper output for a private IP, connection string, SAP URL, or readiness indicator.
 
 ## External Prerequisites
 
@@ -201,7 +203,7 @@ Some dictionaries contain `ukwest` values, some scripts also contain European re
 
 ## Bootstrap Contract
 
-[Extension settings](../../settings.customscriptextension.json) request publisher `Microsoft.Azure.Extensions`, type `CustomScript`, handler `2.0`, and automatic minor upgrades. They download six files from Blob storage and execute them using a hard-coded `/var/lib/waagent/custom-script/download/0/` path.
+[Extension settings](../../archive/settings.customscriptextension.json) request publisher `Microsoft.Azure.Extensions`, type `CustomScript`, handler `2.0`, and automatic minor upgrades. They download six files from Blob storage and execute them using a hard-coded `/var/lib/waagent/custom-script/download/0/` path.
 
 For each stage, the command waits until the file exists, sleeps ten seconds, and pipes the file into `sh -s --` with its arguments. The source scripts use Bash features; a Bash-compatible environment is therefore an assumption. Each stage ends with `;`, not a failure-gating `&&`. The storage account name/key are in extension `protectedSettings`, but sensitive values also travel through ordinary deployment outputs.
 
@@ -209,12 +211,12 @@ The files downloaded at runtime are **not** read directly from the local script 
 
 | Order | Local source | Arguments supplied by template | Observed actions |
 |---:|---|---|---|
-| 1 | [sles-bootstrap-lun0.sh](../../scripts/sles-bootstrap-lun0.sh) | Administrator username | Creates `vg0` on LUN 0; allocates 8 GB swap, 10 GB `/opt`, 2 GB `/tmp`, 10 GB `/home`; formats XFS, moves the administrator home, appends filesystem-table entries including `/var/tmp` bind mount, and mounts. Logs to `/root/bootstrap-lun0.log`. |
-| 2 | [sles-bootstrap-diskconfig.sh](../../scripts/sles-bootstrap-diskconfig.sh) | Role-specific `-luns`, `-names`, `-paths`, `-sizes` | Resolves Azure SCSI LUNs, partitions/formats single disks or creates striped LVM volumes across groups, adds UUID-based filesystem-table entries, and mounts. Logs to `/var/log/sapconfigcreate`. |
-| 3 | [sles-bootstrap-suseclient.sh](../../scripts/sles-bootstrap-suseclient.sh) | None | Downloads client configuration and CA material, installs/updates registration tooling, force-registers with SUSE Manager, disables unmanaged repositories and YaST automatic updates, and syncs the client profile. Full OS update, remote commands, and configuration actions are disabled by its flags. |
-| 4 | [sles-bootstrap-proxy.sh](../../scripts/sles-bootstrap-proxy.sh) | Region | Writes `/etc/sysconfig/proxy`, sets Azure Linux agent proxy host/port, and enables agent auto-update. Logs to `/root/bootstrap-proxy.log`. |
-| 5 | [sles-bootstrap-dns.sh](../../scripts/sles-bootstrap-dns.sh) | Region | Updates search suffixes, discovers the primary `eth0` IP, and submits A and PTR updates with TTL 3600. It does not register every NIC/IP. Logs to `/root/bootstrap-dns.log`. |
-| 6 | [sles-bootstrap-puppet.sh](../../scripts/sles-bootstrap-puppet.sh) | `uksouth dev sap::app <secret>` or `uksouth dev sap::hana <secret>` | Writes enrollment CSR attributes, installs Puppet agent `1.8.3-1.sles12`, sets master and certificate name, enables the service, and launches a background `puppet agent -t`. Logs to `/root/bootstrap-puppet.log`. |
+| 1 | [sles-bootstrap-lun0.sh](../../archive/scripts/sles-bootstrap-lun0.sh) | Administrator username | Creates `vg0` on LUN 0; allocates 8 GB swap, 10 GB `/opt`, 2 GB `/tmp`, 10 GB `/home`; formats XFS, moves the administrator home, appends filesystem-table entries including `/var/tmp` bind mount, and mounts. Logs to `/root/bootstrap-lun0.log`. |
+| 2 | [sles-bootstrap-diskconfig.sh](../../archive/scripts/sles-bootstrap-diskconfig.sh) | Role-specific `-luns`, `-names`, `-paths`, `-sizes` | Resolves Azure SCSI LUNs, partitions/formats single disks or creates striped LVM volumes across groups, adds UUID-based filesystem-table entries, and mounts. Logs to `/var/log/sapconfigcreate`. |
+| 3 | [sles-bootstrap-suseclient.sh](../../archive/scripts/sles-bootstrap-suseclient.sh) | None | Downloads client configuration and CA material, installs/updates registration tooling, force-registers with SUSE Manager, disables unmanaged repositories and YaST automatic updates, and syncs the client profile. Full OS update, remote commands, and configuration actions are disabled by its flags. |
+| 4 | [sles-bootstrap-proxy.sh](../../archive/scripts/sles-bootstrap-proxy.sh) | Region | Writes `/etc/sysconfig/proxy`, sets Azure Linux agent proxy host/port, and enables agent auto-update. Logs to `/root/bootstrap-proxy.log`. |
+| 5 | [sles-bootstrap-dns.sh](../../archive/scripts/sles-bootstrap-dns.sh) | Region | Updates search suffixes, discovers the primary `eth0` IP, and submits A and PTR updates with TTL 3600. It does not register every NIC/IP. Logs to `/root/bootstrap-dns.log`. |
+| 6 | [sles-bootstrap-puppet.sh](../../archive/scripts/sles-bootstrap-puppet.sh) | `uksouth dev sap::app <secret>` or `uksouth dev sap::hana <secret>` | Writes enrollment CSR attributes, installs Puppet agent `1.8.3-1.sles12`, sets master and certificate name, enables the service, and launches a background `puppet agent -t`. Logs to `/root/bootstrap-puppet.log`. |
 
 Puppet CSR metadata uses the default image string `SUSE:SLES-SAP:12-SP2:latest`, even if the actual selected image is BYOS SP1 or SP3. The role command does not pass an image argument to override it.
 
@@ -235,18 +237,18 @@ This records the mismatch without guessing a corrected disk count, swapping role
 
 | ID | Evidence | Consequence and interpretation |
 |---|---|---|
-| L-001 | [settings.json](../../settings.json) has a trailing comma after its last variable. | It is the sole strict-JSON parse failure: 46/47 JSON files parse. Azure acceptance was not tested; this is at least a blocker for strict tooling, not an issue introduced by this specification. |
-| L-002 | [NetWeaver wrapper](../../azuredeploy.netweavergateway.json) sends `App - NetWeaver Gateway` and `DB - NetWeaver Gateway`. | Both omit `(IMOS)` and fail the core's allowed-role contract. Its app instance is `1`, unlike FULL's NetWeaver app instance `0`; the definition preserves that distinction. |
-| L-003 | [Extension role map](../../settings.customscriptextension.json) contains `pp - SAP PO (IMOS)` instead of `App - SAP PO (IMOS)`. | The supported PO application role has no matching bootstrap lookup. SAP PO and FULL cannot be treated as fully working paths. |
-| L-004 | [Data-disk catalogue](../../settings.vm.storageprofile.datadisks.json) and [filesystem arguments](../../settings.customscriptextension.json) disagree. | Four DB profiles reference absent LUNs `6`-`8`; Utilities references absent LUNs `6`-`19`. Storage preparation cannot satisfy those commands as declared. |
+| L-001 | [settings.json](../../archive/settings.json) has a trailing comma after its last variable. | It is the sole strict-JSON parse failure: 46/47 JSON files parse. Azure acceptance was not tested; this is at least a blocker for strict tooling, not an issue introduced by this specification. |
+| L-002 | [NetWeaver wrapper](../../archive/azuredeploy.netweavergateway.json) sends `App - NetWeaver Gateway` and `DB - NetWeaver Gateway`. | Both omit `(IMOS)` and fail the core's allowed-role contract. Its app instance is `1`, unlike FULL's NetWeaver app instance `0`; the definition preserves that distinction. |
+| L-003 | [Extension role map](../../archive/settings.customscriptextension.json) contains `pp - SAP PO (IMOS)` instead of `App - SAP PO (IMOS)`. | The supported PO application role has no matching bootstrap lookup. SAP PO and FULL cannot be treated as fully working paths. |
+| L-004 | [Data-disk catalogue](../../archive/settings.vm.storageprofile.datadisks.json) and [filesystem arguments](../../archive/settings.customscriptextension.json) disagree. | Four DB profiles reference absent LUNs `6`-`8`; Utilities references absent LUNs `6`-`19`. Storage preparation cannot satisfy those commands as declared. |
 | L-005 | The same disk/argument comparison leaves app LUN `2` and Hybris LUNs `9`-`13` unused by local disk setup. | Attaching a disk is not proof that all intended SAP filesystems were configured. External Puppet behavior is unknown. |
-| L-006 | [Data-disk catalogue](../../settings.vm.storageprofile.datadisks.json) differs from the [README](../../README.md). | PO's last disk is 31 GB, not 32 GB; Hybris has three 256 GB disks where the README says 512 GB. No corrected sizing is inferred. |
-| L-007 | Only [OS-disk settings](../../settings.vm.storageprofile.osdisk.json) explicitly select premium storage. | README P-tier descriptions do not establish explicit premium SKUs for data disks. Do not silently document all disks as guaranteed Premium SSDs. |
-| L-008 | [Secret helper](../../validate.keyvault.json) uses ordinary strings/outputs; [validation output](../../validate.json) includes the administrator password and retrieved secrets; settings return further sensitive configuration. Linked deployments enable request/response debug content. | The use of a secure input or extension protected settings does not make the whole pipeline secret-safe. This exposure is an observed limitation, not a requirement for a replacement. |
-| L-009 | [Extension commands](../../settings.customscriptextension.json) concatenate scripts with semicolons, use unbounded file waits, and assume download directory `0`. | Earlier script failures need not determine final command success; waits can hang, and repeated execution/download-directory behavior is not robustly handled. |
-| L-010 | [LUN 0](../../scripts/sles-bootstrap-lun0.sh) and [role disk setup](../../scripts/sles-bootstrap-diskconfig.sh) initialize disks and append filesystem entries without a replay-safe reconciliation design. | Incremental ARM mode does not make guest disk initialization idempotent. Rerunning scripts on populated disks is unsafe. |
-| L-011 | [SUSE registration](../../scripts/sles-bootstrap-suseclient.sh) is fixed to the SP2 activation key label; [Puppet bootstrap](../../scripts/sles-bootstrap-puppet.sh) reports a default non-BYOS SP2 image and backgrounds the first run. | SP1/SP3 selection is not consistently reflected in onboarding; extension success does not prove configuration convergence. Legacy downloads also relax certificate checking in parts of SUSE bootstrap. |
-| L-012 | [Validation](../../validate.json), [extension settings](../../settings.customscriptextension.json), and the bootstrap files hard-code the historical environment. Images and remote scripts are not content-pinned. | This is not a portable or reproducibly versioned generic SAP deployment. Extra region dictionary entries do not imply supported multi-region operation. |
+| L-006 | [Data-disk catalogue](../../archive/settings.vm.storageprofile.datadisks.json) differs from the [README](../../README.md). | PO's last disk is 31 GB, not 32 GB; Hybris has three 256 GB disks where the README says 512 GB. No corrected sizing is inferred. |
+| L-007 | Only [OS-disk settings](../../archive/settings.vm.storageprofile.osdisk.json) explicitly select premium storage. | README P-tier descriptions do not establish explicit premium SKUs for data disks. Do not silently document all disks as guaranteed Premium SSDs. |
+| L-008 | [Secret helper](../../archive/validate.keyvault.json) uses ordinary strings/outputs; [validation output](../../archive/validate.json) includes the administrator password and retrieved secrets; settings return further sensitive configuration. Linked deployments enable request/response debug content. | The use of a secure input or extension protected settings does not make the whole pipeline secret-safe. This exposure is an observed limitation, not a requirement for a replacement. |
+| L-009 | [Extension commands](../../archive/settings.customscriptextension.json) concatenate scripts with semicolons, use unbounded file waits, and assume download directory `0`. | Earlier script failures need not determine final command success; waits can hang, and repeated execution/download-directory behavior is not robustly handled. |
+| L-010 | [LUN 0](../../archive/scripts/sles-bootstrap-lun0.sh) and [role disk setup](../../archive/scripts/sles-bootstrap-diskconfig.sh) initialize disks and append filesystem entries without a replay-safe reconciliation design. | Incremental ARM mode does not make guest disk initialization idempotent. Rerunning scripts on populated disks is unsafe. |
+| L-011 | [SUSE registration](../../archive/scripts/sles-bootstrap-suseclient.sh) is fixed to the SP2 activation key label; [Puppet bootstrap](../../archive/scripts/sles-bootstrap-puppet.sh) reports a default non-BYOS SP2 image and backgrounds the first run. | SP1/SP3 selection is not consistently reflected in onboarding; extension success does not prove configuration convergence. Legacy downloads also relax certificate checking in parts of SUSE bootstrap. |
+| L-012 | [Validation](../../archive/validate.json), [extension settings](../../archive/settings.customscriptextension.json), and the bootstrap files hard-code the historical environment. Images and remote scripts are not content-pinned. | This is not a portable or reproducibly versioned generic SAP deployment. Extra region dictionary entries do not imply supported multi-region operation. |
 
 Additional boundaries are intentional observations rather than proposed fixes: no custom-image path, no SAP installer, no cluster/replication configuration, no actual backup policy despite a backup mount path, no secondary guest-network setup, and no wrapper-level readiness output.
 
@@ -254,12 +256,12 @@ Additional boundaries are intentional observations rather than proposed fixes: n
 
 | Specification requirements | Primary evidence |
 |---|---|
-| FR-001 to FR-006: context, inputs, role selection, naming, orchestration | Launch-profile entry points above; [core](../../azuredeploy.json), [validation](../../validate.json), [secret helper](../../validate.keyvault.json), [property assembly](../../settings.json), [resource orchestration](../../deploy.json) |
-| FR-007 to FR-012: compute, images, storage, availability, diagnostics | [VM assembly](../../settings.vm.json), [storage assembly](../../settings.vm.storageprofile.json), and every leaf in the shared VM settings/role catalogue sections |
-| FR-013 to FR-016: NIC attachments, subnets, address allocation, acceleration, DNS | [NIC 1 assembly](../../settings.nic1.json), [NIC 2 assembly](../../settings.nic2.json), [VM network profile](../../settings.vm.networkprofile.json), and all six NIC leaf templates linked in the network contract |
-| FR-017 to FR-020: extension and operating-system onboarding | [Extension settings](../../settings.customscriptextension.json), [extension resource](../../deploy.customscriptextension.json), and all six local scripts linked in the bootstrap contract |
-| FR-021: ownership | [Tags](../../tags.json) and all five directly created resource templates |
-| FR-022: inspection and secret-handling boundaries | [Core outputs](../../azuredeploy.json), [aggregate outputs](../../deploy.json), wrapper empty outputs, [validation](../../validate.json), [secret helper](../../validate.keyvault.json) |
+| FR-001 to FR-006: context, inputs, role selection, naming, orchestration | Launch-profile entry points above; [core](../../archive/azuredeploy.json), [validation](../../archive/validate.json), [secret helper](../../archive/validate.keyvault.json), [property assembly](../../archive/settings.json), [resource orchestration](../../archive/deploy.json) |
+| FR-007 to FR-012: compute, images, storage, availability, diagnostics | [VM assembly](../../archive/settings.vm.json), [storage assembly](../../archive/settings.vm.storageprofile.json), and every leaf in the shared VM settings/role catalogue sections |
+| FR-013 to FR-016: NIC attachments, subnets, address allocation, acceleration, DNS | [NIC 1 assembly](../../archive/settings.nic1.json), [NIC 2 assembly](../../archive/settings.nic2.json), [VM network profile](../../archive/settings.vm.networkprofile.json), and all six NIC leaf templates linked in the network contract |
+| FR-017 to FR-020: extension and operating-system onboarding | [Extension settings](../../archive/settings.customscriptextension.json), [extension resource](../../archive/deploy.customscriptextension.json), and all six local scripts linked in the bootstrap contract |
+| FR-021: ownership | [Tags](../../archive/tags.json) and all five directly created resource templates |
+| FR-022: inspection and secret-handling boundaries | [Core outputs](../../archive/azuredeploy.json), [aggregate outputs](../../archive/deploy.json), wrapper empty outputs, [validation](../../archive/validate.json), [secret helper](../../archive/validate.keyvault.json) |
 
 ## Validation and Remaining Unknowns
 
@@ -280,3 +282,38 @@ Not established by static inspection:
 - Whether external Puppet code installs or configures SAP. No such manifests are included.
 
 A future implementation plan should resolve these questions and explicitly choose repairs or modernization goals. They are not grounds to claim the unchanged deployment is currently working.
+
+## SAP VM Support Decision Evidence - Bicep/AVM
+
+**Decision date**: 2026-10-26. This section supplements the [specification's SAP VM addendum](spec.md#sap-vm-support-addendum---bicepavm); it does not retrospectively alter the original ARM role catalogue or its Esv3 compute evidence.
+
+### Decisions and Rationale
+
+1. **Production-only HANA certification** was explicitly selected by the user. Keep smaller nonproduction candidates instead of applying the larger production database sizes to every environment.
+2. **Use exact-SKU and workload evidence**, not family-wide inference. Public SAP records establish E20ds_v5 and E32ds_v5 for OLTP single node; BW requires the separately verified M32ls OLAP record.
+3. **Keep Note-dependent checks outstanding**. SAP Note 1928533's normal access path requires login. The user chose public sources; no authenticated copy was read. Application and smaller nonproduction SKU candidates are therefore conditional on an authorized review, not asserted to be verified by this analysis.
+4. **Do not conflate compute certification with sizing or full-system support**. Original data-disk capacities/order remain unchanged. The existing all-Premium-SSD-v1 baseline, guest configuration, SAP releases, OS/kernel revisions and regional capacity have not been qualified for production.
+
+The exact default table, override subsets and SAP-FR-001 to SAP-FR-006 are maintained in [the specification](spec.md#sap-vm-support-addendum---bicepavm), with executable selections in [the catalogue](../../infra/catalog.json).
+
+### Source Register
+
+| Source | Evidence used | Access and limitation |
+|---|---|---|
+| [SAP Note 1928533](https://me.sap.com/notes/1928533) | Required authoritative product/exact-SKU/SAPS review. | Login page reached; Note contents not accessed. No SKU table or SAPS values extracted. |
+| [SAP HANA record 2638](https://www.sap.com/dmc/exp/2014-09-02-hana-hardware/enEN/#/solutions?filters=ve:24&id=s:2638) | E20ds_v5, 160 GiB, OLTP single node; selected for production Gateway/PO/FES databases. | Public entry inspected on 2026-10-26, including Gen2, OS and storage restrictions. |
+| [SAP HANA record 2639](https://www.sap.com/dmc/exp/2014-09-02-hana-hardware/enEN/#/solutions?filters=ve:24&id=s:2639) | E32ds_v5, 256 GiB, OLTP single node; selected for production Utilities/Hybris databases. | Public entry inspected on 2026-10-26; not evidence for BW/OLAP. |
+| [SAP HANA record 2008](https://www.sap.com/dmc/exp/2014-09-02-hana-hardware/enEN/#/solutions?filters=ve:24&id=s:2008) | M32ls, 256 GiB, OLAP single node; selected for production BW. | Public entry inspected on 2026-10-26, including OS and storage restrictions. |
+| [SAP HANA record 2278](https://www.sap.com/dmc/exp/2014-09-02-hana-hardware/enEN/#/solutions?filters=ve:24&id=s:2278) | Separate M32ls OLTP single-node certification; supports that locally permitted override. | Public entry inspected on 2026-10-26; distinct from the OLAP certificate. |
+| [Microsoft SAP support scope](https://learn.microsoft.com/en-us/azure/sap/workloads/supported-product-on-azure) and [HANA VM operations](https://learn.microsoft.com/en-us/azure/sap/workloads/hana-vm-operations#choose-azure-vm-types) | NetWeaver support, nonproduction HANA and production HANA require different checks. | Public guidance inspected; does not substitute for the protected Note's exact listings. |
+| [Microsoft HANA installation guidance](https://learn.microsoft.com/en-us/azure/sap/workloads/hana-get-started#step-by-step-before-deploying), referring to [SAP Note 2235581](https://me.sap.com/notes/2235581) | Need to match HANA release/patch level to the supported OS, then check the product availability matrix. | Microsoft guidance inspected; SAP Note 2235581 and the target release matrix were not independently read/validated. |
+| [Microsoft HANA storage guidance](https://learn.microsoft.com/en-us/azure/sap/workloads/hana-vm-operations-storage) | Compute certification alone does not approve arbitrary data/log storage. | Public guidance inspected; the retained disk layout remains an unresolved production qualification item. |
+
+### Requirement and Validation Mapping
+
+- **SAP-FR-001 to SAP-FR-003**: [Catalogue](../../infra/catalog.json), [Bicep resolution](../../infra/main.bicep), [configuration validation](../../pipelines/scripts/Test-Configuration.ps1); covered by [catalogue tests](../../tests/Catalog.Tests.ps1) and [configuration tests](../../tests/Configuration.Tests.ps1).
+- **SAP-FR-004**: Required `sapSupportReviewReference`, configuration preflight, tags and plan metadata. A populated reference is an attestation; the software does not authenticate to SAP or validate the referenced review contents.
+- **SAP-FR-005**: [Azure SKU/image/capability checks](../../pipelines/scripts/Invoke-Deployment.ps1), exercised with mocked Azure responses in [deployment tests](../../tests/Deployment.Tests.ps1). These tests are not a live regional or subscription availability check.
+- **SAP-FR-006**: The [deployment guide](../../infra/README.md#sap-support-and-vm-selection) and specification explicitly retain the production storage/release qualification caveat. No automatic full-system certification or production readiness result is claimed.
+
+Revalidate public certificates and protected Note/product requirements when selecting a new SKU, changing releases or approving a production deployment. The source register is a dated decision record, not a replacement for current SAP support terms.

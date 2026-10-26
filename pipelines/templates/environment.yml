@@ -1,0 +1,92 @@
+parameters:
+  - name: environmentName
+    type: string
+  - name: planServiceConnection
+    type: string
+  - name: deployServiceConnection
+    type: string
+  - name: subscriptionId
+    type: string
+  - name: resourceGroupName
+    type: string
+  - name: deploymentEnvironment
+    type: string
+
+stages:
+  - stage: Plan
+    displayName: Validate and preview ${{ parameters.environmentName }}
+    dependsOn: Build
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - job: WhatIf
+        timeoutInMinutes: 60
+        steps:
+          - checkout: self
+            persistCredentials: false
+          - download: current
+            artifact: iac
+          - task: AzureCLI@2
+            displayName: Verify target, validate and run what-if
+            inputs:
+              azureSubscription: ${{ parameters.planServiceConnection }}
+              scriptType: pscore
+              scriptLocation: scriptPath
+              scriptPath: pipelines/scripts/Invoke-Deployment.ps1
+              arguments: >-
+                -Operation Plan
+                -EnvironmentName "${{ parameters.environmentName }}"
+                -SubscriptionId "${{ parameters.subscriptionId }}"
+                -ResourceGroupName "${{ parameters.resourceGroupName }}"
+                -ArtifactDirectory "$(Pipeline.Workspace)/iac"
+                -ReportDirectory "$(Pipeline.Workspace)/plan"
+                -SourceVersion "$(Build.SourceVersion)"
+                -DeploymentName "sap-${{ parameters.environmentName }}-$(Build.BuildId)"
+              visibleAzLogin: false
+              addSpnToEnvironment: false
+          - publish: $(Pipeline.Workspace)/plan
+            artifact: plan-${{ parameters.environmentName }}
+            displayName: Publish reviewable plan and change digest
+
+  - stage: Deploy
+    displayName: Apply approved ${{ parameters.environmentName }} plan
+    dependsOn: Plan
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    lockBehavior: sequential
+    jobs:
+      - deployment: ApplyIaC
+        displayName: Deploy and verify infrastructure
+        environment: ${{ parameters.deploymentEnvironment }}
+        timeoutInMinutes: 180
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                  persistCredentials: false
+                - download: none
+                - download: current
+                  artifact: iac
+                - download: current
+                  artifact: plan-${{ parameters.environmentName }}
+                - task: AzureCLI@2
+                  displayName: Recheck approved changes, deploy and verify
+                  inputs:
+                    azureSubscription: ${{ parameters.deployServiceConnection }}
+                    scriptType: pscore
+                    scriptLocation: scriptPath
+                    scriptPath: pipelines/scripts/Invoke-Deployment.ps1
+                    arguments: >-
+                      -Operation Deploy
+                      -EnvironmentName "${{ parameters.environmentName }}"
+                      -SubscriptionId "${{ parameters.subscriptionId }}"
+                      -ResourceGroupName "${{ parameters.resourceGroupName }}"
+                      -ArtifactDirectory "$(Pipeline.Workspace)/iac"
+                      -PlanDirectory "$(Pipeline.Workspace)/plan-${{ parameters.environmentName }}"
+                      -ReportDirectory "$(Pipeline.Workspace)/deployment"
+                      -SourceVersion "$(Build.SourceVersion)"
+                      -DeploymentName "sap-${{ parameters.environmentName }}-$(Build.BuildId)"
+                    visibleAzLogin: false
+                    addSpnToEnvironment: false
+                - publish: $(Pipeline.Workspace)/deployment
+                  artifact: deployment-${{ parameters.environmentName }}
+                  displayName: Publish infrastructure verification results

@@ -1,0 +1,59 @@
+stages:
+  - stage: Build
+    displayName: Compile, lint and test IaC
+    jobs:
+      - job: BuildIaC
+        timeoutInMinutes: 30
+        steps:
+          - checkout: self
+            clean: true
+            fetchDepth: 1
+            persistCredentials: false
+          - pwsh: |
+              $ErrorActionPreference = 'Stop'
+              $PSNativeCommandUseErrorActionPreference = $false
+              $tools = Import-PowerShellDataFile ./pipelines/tools.psd1
+              $version = (& az bicep version --only-show-errors) -join "`n"
+              if ($LASTEXITCODE -ne 0 -or $version -notmatch "Bicep CLI version $([regex]::Escape($tools.BicepVersion))\b") {
+                az bicep install --version "v$($tools.BicepVersion)" --only-show-errors
+                if ($LASTEXITCODE -ne 0) { throw 'Pinned Bicep installation failed.' }
+              }
+              foreach ($module in @(
+                @{ Name = 'Pester'; Version = $tools.PesterVersion },
+                @{ Name = 'powershell-yaml'; Version = $tools.YamlVersion }
+              )) {
+                if (-not (Get-Module -ListAvailable $module.Name | Where-Object Version -EQ $module.Version)) {
+                  Install-Module -Name $module.Name -RequiredVersion $module.Version -Scope CurrentUser -Repository PSGallery -Force
+                }
+              }
+            displayName: Restore pinned compiler and test dependencies
+          - task: PowerShell@2
+            displayName: Build all environment artifacts
+            inputs:
+              pwsh: true
+              targetType: filePath
+              filePath: pipelines/scripts/Build-IaC.ps1
+              arguments: -OutputDirectory "$(Build.SourcesDirectory)/.build/iac" -SourceVersion "$(Build.SourceVersion)"
+          - pwsh: |
+              $ErrorActionPreference = 'Stop'
+              $tools = Import-PowerShellDataFile ./pipelines/tools.psd1
+              Import-Module Pester -RequiredVersion $tools.PesterVersion
+              Import-Module powershell-yaml -RequiredVersion $tools.YamlVersion
+              $config = New-PesterConfiguration
+              $config.Run.Path = './tests'
+              $config.Run.Exit = $true
+              $config.TestResult.Enabled = $true
+              $config.TestResult.OutputPath = './.build/test-results/results.xml'
+              $config.Output.Verbosity = 'Detailed'
+              Invoke-Pester -Configuration $config
+            displayName: Test topology, guardrails and pipeline YAML
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: NUnit
+              testResultsFiles: .build/test-results/results.xml
+              failTaskOnFailedTests: true
+              failTaskOnMissingResultsFile: true
+          - publish: $(Build.SourcesDirectory)/.build/iac
+            artifact: iac
+            displayName: Publish immutable compiled IaC

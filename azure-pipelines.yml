@@ -1,0 +1,32 @@
+name: iac-ci-$(Date:yyyyMMdd).$(Rev:r)
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - infra/*
+      - pipelines/*
+      - tests/*
+      - azure-pipelines.yml
+      - archive/**
+
+pr:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - infra/*
+      - pipelines/*
+      - tests/*
+      - azure-pipelines.yml
+      - archive/**
+
+pool:
+  vmImage: ubuntu-24.04
+
+stages:
+  - template: pipelines/templates/build.yml

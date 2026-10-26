@@ -1,0 +1,6 @@
+variables:
+  planServiceConnection: REQUIRED_TEST_PLAN_WIF_CONNECTION
+  deployServiceConnection: REQUIRED_TEST_DEPLOY_WIF_CONNECTION
+  subscriptionId: REQUIRED_TEST_SUBSCRIPTION_ID
+  resourceGroupName: REQUIRED_TEST_RESOURCE_GROUP
+  deploymentEnvironment: sap-test

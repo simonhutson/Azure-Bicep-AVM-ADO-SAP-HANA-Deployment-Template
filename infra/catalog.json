@@ -1,0 +1,89 @@
+{
+  "vmPolicy": {
+    "reviewedOn": "2026-10-26",
+    "sapNote1928533": "https://me.sap.com/notes/1928533",
+    "sapNote1928533Access": "Authentication required; exact application and nonproduction SKU listings not independently verified",
+    "applicationCandidates": ["Standard_E4ds_v5", "Standard_E8ds_v5", "Standard_E16ds_v5", "Standard_E20ds_v5", "Standard_E32ds_v5"],
+    "nonProductionHanaCandidates": ["Standard_E8ds_v5", "Standard_E16ds_v5", "Standard_E20ds_v5", "Standard_E32ds_v5", "Standard_M32ls"],
+    "hanaCertifications": {
+      "Standard_E20ds_v5": {
+        "oltp": "https://www.sap.com/dmc/exp/2014-09-02-hana-hardware/enEN/#/solutions?filters=ve:24&id=s:2638"
+      },
+      "Standard_E32ds_v5": {
+        "oltp": "https://www.sap.com/dmc/exp/2014-09-02-hana-hardware/enEN/#/solutions?filters=ve:24&id=s:2639"
+      },
+      "Standard_M32ls": {
+        "oltp": "https://www.sap.com/dmc/exp/2014-09-02-hana-hardware/enEN/#/solutions?filters=ve:24&id=s:2278",
+        "olap": "https://www.sap.com/dmc/exp/2014-09-02-hana-hardware/enEN/#/solutions?filters=ve:24&id=s:2008"
+      }
+    }
+  },
+  "roles": {
+    "app-nw-gateway": { "legacyRole": "App - NetWeaver Gateway (IMOS)", "legacyVmSize": "Standard_E4s_v3", "category": "sap", "vmSize": "Standard_E4ds_v5", "dataDiskSizesGB": [32, 32, 64], "network": "gateway", "availabilitySuffix": "nw-gateway", "serviceName": "IMOS \u2013 EUR" },
+    "app-po": { "legacyRole": "App - SAP PO (IMOS)", "legacyVmSize": "Standard_E4s_v3", "category": "sap", "vmSize": "Standard_E4ds_v5", "dataDiskSizesGB": [32, 32, 64], "network": "po", "availabilitySuffix": "sap-po", "serviceName": "IMOS \u2013 EUR" },
+    "app-gateway-fes": { "legacyRole": "App - Netweaver Gateway FES", "legacyVmSize": "Standard_E4s_v3", "category": "sap", "vmSize": "Standard_E4ds_v5", "dataDiskSizesGB": [32, 32, 64], "network": "gateway", "availabilitySuffix": "nw-fes", "serviceName": "SAP NETWEAVER GATEWAY - EUR" },
+    "app-bw": { "legacyRole": "App - SAP BW", "legacyVmSize": "Standard_E4s_v3", "category": "sap", "vmSize": "Standard_E4ds_v5", "dataDiskSizesGB": [32, 32, 64], "network": "bw", "availabilitySuffix": "bw", "serviceName": "SAP BUSINESS WAREHOUSE - EUR" },
+    "app-utilities": { "legacyRole": "App - S/4HANA Utilities", "legacyVmSize": "Standard_E4s_v3", "category": "sap", "vmSize": "Standard_E4ds_v5", "dataDiskSizesGB": [32, 32, 64], "network": "utilities", "availabilitySuffix": "utilities", "serviceName": "UTILITIES - EUR" },
+    "app-cc": { "legacyRole": "App - Convergent Charging", "legacyVmSize": "Standard_E4s_v3", "category": "sap", "vmSize": "Standard_E4ds_v5", "dataDiskSizesGB": [32, 32, 64], "network": "hybris", "availabilitySuffix": "hybris-cc", "serviceName": "SAP HYBRIS BILLING - EUR" },
+    "app-ci": { "legacyRole": "App - Convergent Invoicing", "legacyVmSize": "Standard_E4s_v3", "category": "sap", "vmSize": "Standard_E4ds_v5", "dataDiskSizesGB": [32, 32, 64], "network": "hybris", "availabilitySuffix": "hybris-ci", "serviceName": "SAP HYBRIS BILLING - EUR" },
+    "app-som-abap": { "legacyRole": "App - SOM (CRM ABAP)", "legacyVmSize": "Standard_E4s_v3", "category": "sap", "vmSize": "Standard_E4ds_v5", "dataDiskSizesGB": [32, 32, 64], "network": "hybris", "availabilitySuffix": "som-abap", "serviceName": "SAP HYBRIS BILLING - EUR" },
+    "app-som-java": { "legacyRole": "App - SOM (CRM JAVA)", "legacyVmSize": "Standard_E4s_v3", "category": "sap", "vmSize": "Standard_E4ds_v5", "dataDiskSizesGB": [32, 32, 64], "network": "hybris", "availabilitySuffix": "som-java", "serviceName": "SAP HYBRIS BILLING - EUR" },
+    "app-cloud-connector": { "legacyRole": "App - Cloud Connector", "legacyVmSize": "Standard_E4s_v3", "category": "sap", "vmSize": "Standard_E4ds_v5", "dataDiskSizesGB": [32, 32, 64], "network": "cloudConnector", "availabilitySuffix": "cloudconnector", "serviceName": "SAP CLOUD CONNECTOR" },
+    "db-nw-gateway": { "legacyRole": "DB - NetWeaver Gateway (IMOS)", "legacyVmSize": "Standard_E8s_v3", "category": "han", "hanaWorkload": "oltp", "vmSize": "Standard_E8ds_v5", "productionVmSize": "Standard_E20ds_v5", "dataDiskSizesGB": [32, 32, 64, 128, 64, 32], "network": "gateway", "availabilitySuffix": "nwgateway", "serviceName": "IMOS \u2013 EUR" },
+    "db-po": { "legacyRole": "DB - SAP PO (IMOS)", "legacyVmSize": "Standard_E8s_v3", "category": "han", "hanaWorkload": "oltp", "vmSize": "Standard_E8ds_v5", "productionVmSize": "Standard_E20ds_v5", "dataDiskSizesGB": [32, 32, 64, 128, 64, 31], "network": "po", "availabilitySuffix": "po", "serviceName": "IMOS \u2013 EUR" },
+    "db-gateway-fes": { "legacyRole": "DB - Netweaver Gateway FES", "legacyVmSize": "Standard_E8s_v3", "category": "han", "hanaWorkload": "oltp", "vmSize": "Standard_E8ds_v5", "productionVmSize": "Standard_E20ds_v5", "dataDiskSizesGB": [32, 32, 64, 128, 64, 32], "network": "gateway", "availabilitySuffix": "nwgatewayfes", "serviceName": "SAP NETWEAVER GATEWAY - EUR" },
+    "db-bw": { "legacyRole": "DB - SAP BW", "legacyVmSize": "Standard_E16s_v3", "category": "han", "hanaWorkload": "olap", "vmSize": "Standard_E16ds_v5", "productionVmSize": "Standard_M32ls", "dataDiskSizesGB": [32, 32, 128, 512, 128, 64], "network": "bw", "availabilitySuffix": "bw", "serviceName": "SAP BUSINESS WAREHOUSE - EUR" },
+    "db-utilities": { "legacyRole": "DB - S/4HANA Utilities", "legacyVmSize": "Standard_E32s_v3", "category": "han", "hanaWorkload": "oltp", "vmSize": "Standard_E32ds_v5", "productionVmSize": "Standard_E32ds_v5", "dataDiskSizesGB": [32, 32, 128, 512, 128, 64], "network": "utilities", "availabilitySuffix": "utilities", "serviceName": "UTILITIES - EUR" },
+    "db-hybris": { "legacyRole": "DB - S/4HANA Hybris Billing", "legacyVmSize": "Standard_E32s_v3", "category": "han", "hanaWorkload": "oltp", "vmSize": "Standard_E32ds_v5", "productionVmSize": "Standard_E32ds_v5", "dataDiskSizesGB": [32, 32, 128, 256, 128, 64, 128, 256, 128, 64, 128, 256, 128, 64], "network": "hybris", "availabilitySuffix": "hybrisbilling", "serviceName": "SAP HYBRIS BILLING - EUR" }
+  },
+  "landscapes": {
+    "netweaverGateway": [
+      { "role": "app-nw-gateway", "instance": "1", "nic1IpAddresses": ["", "", "", ""], "nic2IpAddresses": ["", "", ""] },
+      { "role": "db-nw-gateway", "instance": "0", "nic1IpAddresses": ["", ""], "nic2IpAddresses": ["", ""] }
+    ],
+    "gatewayFes": [
+      { "role": "app-gateway-fes", "instance": "2", "nic1IpAddresses": ["", "", "", ""], "nic2IpAddresses": ["", "", ""] },
+      { "role": "db-gateway-fes", "instance": "2", "nic1IpAddresses": ["", ""], "nic2IpAddresses": ["", ""] }
+    ],
+    "sapPo": [
+      { "role": "app-po", "instance": "1", "nic1IpAddresses": ["", "", "", ""], "nic2IpAddresses": ["", "", ""] },
+      { "role": "db-po", "instance": "1", "nic1IpAddresses": ["", ""], "nic2IpAddresses": ["", ""] }
+    ],
+    "sapBw": [
+      { "role": "app-bw", "instance": "3", "nic1IpAddresses": ["", "", "", ""], "nic2IpAddresses": ["", "", ""] },
+      { "role": "db-bw", "instance": "3", "nic1IpAddresses": ["", ""], "nic2IpAddresses": ["", ""] }
+    ],
+    "utilities": [
+      { "role": "app-utilities", "instance": "4", "nic1IpAddresses": ["", "", "", ""], "nic2IpAddresses": ["", "", ""] },
+      { "role": "db-utilities", "instance": "4", "nic1IpAddresses": ["", ""], "nic2IpAddresses": ["", ""] }
+    ],
+    "cloudConnector": [
+      { "role": "app-cloud-connector", "instance": "9", "nic1IpAddresses": ["", "", "", ""], "nic2IpAddresses": ["", "", ""] }
+    ],
+    "hybrisBilling": [
+      { "role": "app-cc", "instance": "5", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", ""] },
+      { "role": "app-ci", "instance": "6", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", ""] },
+      { "role": "app-som-abap", "instance": "7", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", ""] },
+      { "role": "app-som-java", "instance": "8", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", ""] },
+      { "role": "db-hybris", "instance": "5", "nic1IpAddresses": ["", "", "", ""], "nic2IpAddresses": ["", "", "", ""] }
+    ],
+    "full": [
+      { "role": "app-nw-gateway", "instance": "0", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", ""] },
+      { "role": "app-po", "instance": "1", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", ""] },
+      { "role": "app-gateway-fes", "instance": "2", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", ""] },
+      { "role": "app-bw", "instance": "3", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", ""] },
+      { "role": "app-utilities", "instance": "4", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", ""] },
+      { "role": "app-cc", "instance": "5", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", ""] },
+      { "role": "app-ci", "instance": "6", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", ""] },
+      { "role": "app-som-abap", "instance": "7", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", ""] },
+      { "role": "app-som-java", "instance": "8", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", ""] },
+      { "role": "app-cloud-connector", "instance": "9", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", ""] },
+      { "role": "db-nw-gateway", "instance": "0", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", "", ""] },
+      { "role": "db-po", "instance": "1", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", "", ""] },
+      { "role": "db-gateway-fes", "instance": "2", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", "", ""] },
+      { "role": "db-bw", "instance": "3", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", "", ""] },
+      { "role": "db-utilities", "instance": "4", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", "", ""] },
+      { "role": "db-hybris", "instance": "5", "nic1IpAddresses": ["", "", ""], "nic2IpAddresses": ["", "", "", ""] }
+    ]
+  }
+}

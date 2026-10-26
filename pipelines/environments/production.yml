@@ -1,0 +1,6 @@
+variables:
+  planServiceConnection: REQUIRED_PRODUCTION_PLAN_WIF_CONNECTION
+  deployServiceConnection: REQUIRED_PRODUCTION_DEPLOY_WIF_CONNECTION
+  subscriptionId: REQUIRED_PRODUCTION_SUBSCRIPTION_ID
+  resourceGroupName: REQUIRED_PRODUCTION_RESOURCE_GROUP
+  deploymentEnvironment: sap-production

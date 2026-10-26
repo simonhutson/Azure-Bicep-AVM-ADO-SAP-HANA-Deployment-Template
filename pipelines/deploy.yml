@@ -1,0 +1,31 @@
+name: iac-${{ parameters.targetEnvironment }}-$(Date:yyyyMMdd).$(Rev:r)
+
+trigger: none
+pr: none
+
+parameters:
+  - name: targetEnvironment
+    displayName: Target environment
+    type: string
+    default: development
+    values:
+      - development
+      - test
+      - production
+
+variables:
+  - template: environments/${{ parameters.targetEnvironment }}.yml
+
+pool:
+  vmImage: ubuntu-24.04
+
+stages:
+  - template: templates/build.yml
+  - template: templates/environment.yml
+    parameters:
+      environmentName: ${{ parameters.targetEnvironment }}
+      planServiceConnection: ${{ variables.planServiceConnection }}
+      deployServiceConnection: ${{ variables.deployServiceConnection }}
+      subscriptionId: ${{ variables.subscriptionId }}
+      resourceGroupName: ${{ variables.resourceGroupName }}
+      deploymentEnvironment: ${{ variables.deploymentEnvironment }}

@@ -4,9 +4,11 @@
 
 **Created**: 2026-10-26
 
-**Status**: Draft - reverse-engineered baseline, not deployment-certified
+**Status**: Draft - historical baseline with SAP VM support addendum; not deployment-certified
 
 **Input**: User description: "Analyse this old Azure SAP deployment ARM template and create a Spec Kit definition for what it is doing."
+
+**Historical baseline**: This specification records the original manually launched ARM implementation. Its property-sized linked templates were an intentional composition choice, not a defect. The separately implemented [Bicep/AVM migration](../../infra/README.md) retains this definition for traceability. The [SAP VM support addendum](#sap-vm-support-addendum---bicepavm) below records the replacement's environment-specific SKU decisions without rewriting the original requirements.
 
 ## Purpose and Scope
 
@@ -14,7 +16,7 @@ Enable an infrastructure operator to request a single SAP application or HANA da
 
 The deployment provisions and configures infrastructure and attempts operating-system onboarding. It does **not** contain an SAP or HANA software installer. Any subsequent SAP configuration performed by external Puppet code is outside the available source.
 
-This is an as-is definition, not a modernization proposal. Requirements express the inferred functional contract. The [supporting analysis](research.md) records exact legacy configuration, source evidence, and defects separately; those defects are not recommendations to reproduce unsafe or broken behavior.
+The scope, FR-001 to FR-022, SC-001 to SC-006, and original user stories describe the as-is ARM baseline. The separately labelled SAP VM support addendum applies only to the Bicep/AVM replacement. The [supporting analysis](research.md) records exact legacy configuration, source evidence, and defects separately; those defects are not recommendations to reproduce unsafe or broken behavior.
 
 ### In Scope
 
@@ -192,9 +194,69 @@ Counts apply to the selected deployment's identities, not to all pre-existing re
 - Bootstrap targets are disposable Linux VMs with blank data disks and a Bash-compatible shell environment. Repeated storage initialization is not assumed safe.
 - External Puppet manifests, SAP media, licensing, system identifiers, and post-provisioning workflows are not available in this repository.
 
+## SAP VM Support Addendum - Bicep/AVM
+
+**Decision and evidence date**: 2026-10-26.
+
+**Scope**: The active Bicep/AVM replacement only. The archived ARM sizes remain historical evidence; the replacement retains them as `legacyVmSize` in [the catalogue](../../infra/catalog.json).
+
+**Confirmed decision**: Require workload-specific HANA-certified SKU selections for **production**, while retaining smaller development/test candidates. A family name, an Azure-supported size, a NetWeaver listing, and a HANA certification are not interchangeable support claims.
+
+### Selected Exact SKUs
+
+| Role group | Development/test default | Production default | Support evidence and outstanding checks |
+|---|---|---|---|
+| All ten application roles | `Standard_E4ds_v5` - 32 GiB | `Standard_E4ds_v5` - 32 GiB | Application candidate, **not independently verified** against the current Note 1928533. Confirm the exact SKU, SAP product/component, OS and kernel requirements through an authorized review. |
+| HANA for NetWeaver Gateway, SAP PO and Gateway FES | `Standard_E8ds_v5` - 64 GiB | `Standard_E20ds_v5` - 160 GiB | Production: public SAP directory [record 2638](https://www.sap.com/dmc/exp/2014-09-02-hana-hardware/enEN/#/solutions?filters=ve:24&id=s:2638), **OLTP single node**. The smaller nonproduction candidate still requires Note 1928533 confirmation. |
+| HANA for SAP BW | `Standard_E16ds_v5` - 128 GiB | `Standard_M32ls` - 256 GiB | Production: public SAP directory [record 2008](https://www.sap.com/dmc/exp/2014-09-02-hana-hardware/enEN/#/solutions?filters=ve:24&id=s:2008), **OLAP single node**. An OLTP-only E-series certificate does not qualify for this role. |
+| HANA for S/4HANA Utilities and Hybris Billing | `Standard_E32ds_v5` - 256 GiB | `Standard_E32ds_v5` - 256 GiB | Production: public SAP directory [record 2639](https://www.sap.com/dmc/exp/2014-09-02-hana-hardware/enEN/#/solutions?filters=ve:24&id=s:2639), **OLTP single node**. |
+
+These are exact selected SKUs, not an exhaustive list of SAP-supported Azure sizes or a production-sizing recommendation. Production increases the smaller database footprints; confirm SAPS, CPU, memory growth, licensing and cost through workload sizing.
+
+The implementation also restricts overrides to a local, reviewable subset:
+
+- **Application candidates**: `Standard_E4ds_v5`, `Standard_E8ds_v5`, `Standard_E16ds_v5`, `Standard_E20ds_v5`, `Standard_E32ds_v5`. Inclusion is not a claim that the current protected SAP Note was read.
+- **Nonproduction HANA candidates**: `Standard_E8ds_v5`, `Standard_E16ds_v5`, `Standard_E20ds_v5`, `Standard_E32ds_v5`, `Standard_M32ls`. Validate the exact Note 1928533 applicability before use.
+- **Production HANA, OLTP**: `Standard_E20ds_v5`, `Standard_E32ds_v5`, or `Standard_M32ls`, with a matching public directory record. M32ls has a separately inspected [OLTP record 2278](https://www.sap.com/dmc/exp/2014-09-02-hana-hardware/enEN/#/solutions?filters=ve:24&id=s:2278).
+- **Production HANA, OLAP/BW**: `Standard_M32ls`, based on record 2008. The inspected E20ds_v5 and E32ds_v5 records establish OLTP support, not OLAP support.
+
+### SAP Notes, Sources and Verification Status
+
+| Reference | Purpose in the support decision | Verification status |
+|---|---|---|
+| [SAP Note 1928533 - SAP Applications on Microsoft Azure: Supported Products and Azure VM types](https://me.sap.com/notes/1928533) | Supported SAP products, exact Azure VM types, SAPS and associated restrictions; required application/nonproduction review. | **Authentication required; contents not accessed.** The normal SAP for Me sign-in page was reached. No current SKU listing or SAPS value from this Note is claimed verified. |
+| [SAP Note 2235581](https://me.sap.com/notes/2235581) | SAP HANA release/patch-level compatibility with the selected operating system. | **Required follow-up; contents not accessed.** Its role is identified by Microsoft's [HANA installation guidance](https://learn.microsoft.com/en-us/azure/sap/workloads/hana-get-started#step-by-step-before-deploying). |
+| Public SAP HANA Hardware Directory records 2638, 2639, 2008 and 2278, linked above | Exact production HANA SKU, OLTP/OLAP single-node applicability, supported OS and storage restrictions. | Inspected on 2026-10-26; this is a dated evidence snapshot, not a permanent certification guarantee. |
+| [Microsoft SAP support guidance](https://learn.microsoft.com/en-us/azure/sap/workloads/supported-product-on-azure) and [HANA VM operations](https://learn.microsoft.com/en-us/azure/sap/workloads/hana-vm-operations#choose-azure-vm-types) | Explain the distinction between NetWeaver support, nonproduction choices and production HANA certification. | Public guidance inspected; it does not replace the protected Note or product-specific checks. |
+| [Microsoft HANA storage guidance](https://learn.microsoft.com/en-us/azure/sap/workloads/hana-vm-operations-storage) and the target SAP Product Availability Matrix | Validate storage and the supported product/OS/HANA combination. | Public storage guidance inspected; the target deployment's product/release matrix and complete storage design remain to be verified by an authorized operator. |
+
+The support review must include applicable product/component requirements, including Cloud Connector where relevant, plus OS/kernel and HANA revisions. A SLES for SAP 15 image alone does not establish support for every HANA or application release.
+
+### Addendum Requirements
+
+These SAP-FR identifiers apply to the replacement only and do not change the archived ARM functional contract.
+
+- **SAP-FR-001**: The replacement MUST select the environment-specific defaults above when no per-VM override is supplied; development/test MUST NOT silently inherit the larger production HANA defaults.
+- **SAP-FR-002**: A production HANA override MUST match an exact recorded SKU and the role's `oltp` or `olap` single-node workload. Arbitrary `Standard_*` values and family-wide certification assumptions MUST be rejected.
+- **SAP-FR-003**: Application and nonproduction candidates MUST remain explicitly distinguished from independently verified production HANA records. Additional SKUs MUST enter the local policy through a reviewed evidence-backed change.
+- **SAP-FR-004**: Before authenticated planning/deployment, an operator MUST supply a nonempty, non-placeholder `sapSupportReviewReference` identifying the exact-SKU/product/OS/HANA/storage review. It MUST be retained in resource tags and the plan. This reference is an operator attestation, not automated SAP Note verification.
+- **SAP-FR-005**: Planning MUST check actual regional/subscription SKU availability and restrictions, x64/Gen2 compatibility, two-NIC and data-disk limits, Premium storage, host encryption, and HANA accelerated-networking capability. Azure capability checks MUST NOT be represented as SAP certification or a capacity/quota guarantee.
+- **SAP-FR-006**: VM certification MUST NOT be reported as certification of the complete deployment. The retained all-`Premium_LRS` disk baseline is **not** a certified production HANA storage design; resolve log/data storage, IOPS/throughput, guest filesystems and supported release combinations before installing a production workload. In particular, the selected E-series records do not grant blanket Premium SSD v1 approval for `/hana/log`.
+
+### Addendum Acceptance Scenarios
+
+1. **Given** FULL with no size overrides, **When** production selections are resolved, **Then** the ten app VMs use E4ds_v5, the Gateway/PO/FES databases use E20ds_v5, BW uses M32ls, and Utilities/Hybris databases use E32ds_v5.
+2. **Given** the Gateway FES pair with no overrides, **When** it targets test, **Then** its database uses E8ds_v5 rather than the production E20ds_v5.
+3. **Given** a production BW request overridden to E20ds_v5 or E32ds_v5, **When** preflight runs, **Then** the request is rejected because the recorded evidence is OLTP-only.
+4. **Given** an arbitrary application/nonproduction SKU or a missing support-review reference, **When** preflight runs, **Then** the request is rejected before an authenticated Azure plan is attempted.
+5. **Given** a policy-listed SKU that is regionally unavailable or lacks a required platform capability, **When** authenticated planning runs, **Then** it fails before ARM validation/deployment rather than treating catalogue inclusion as availability.
+
+Implementation and evidence mapping: [catalogue](../../infra/catalog.json), [Bicep entry point](../../infra/main.bicep), [configuration preflight](../../pipelines/scripts/Test-Configuration.ps1), [Azure plan/apply checks](../../pipelines/scripts/Invoke-Deployment.ps1), and [supporting decision analysis](research.md#sap-vm-support-decision-evidence---bicepavm).
+
 ## Supporting Material
 
 - [Reverse-engineered architecture, catalogues, source mapping, and limitations](research.md)
 - [Specification completeness and validation checklist](checklists/requirements.md)
+- [Bicep/AVM SAP VM support and deployment guide](../../infra/README.md#sap-support-and-vm-selection)
 
 The structure follows the [Spec Kit feature specification template](https://github.com/github/spec-kit/blob/main/templates/spec-template.md). This change does not install Spec Kit tooling or create an implementation plan; a future plan should explicitly decide which legacy constraints to retain and which defects to correct.
